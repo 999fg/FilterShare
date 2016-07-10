@@ -8,6 +8,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.graphics.Rect;
 import android.hardware.Camera;
 import android.media.ExifInterface;
 import android.net.Uri;
@@ -15,6 +16,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
@@ -25,7 +27,9 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by shinjaemin on 2016. 7. 6..
@@ -40,6 +44,7 @@ public class MainActivity extends Activity {
     public static final int MEDIA_TYPE_VIDEO = 2;
 
     public static final int GALLERY_INTENT = 0;
+    private static  final int FOCUS_AREA_SIZE= 300;
 
 
 
@@ -102,11 +107,13 @@ public class MainActivity extends Activity {
         if(checkCameraHardware(this)) {
             Log.d("Ok", "It has camera");
             mCamera = getCameraInstance();
+
+
             //set camera to continually auto-focus
             Camera.Parameters params = mCamera.getParameters();
             params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
             mCamera.setParameters(params);
-            mCamera.setParameters(params);
+
             if (mCamera==null)
                 Log.e("Fail", "no Camera Instance");
         }
@@ -118,6 +125,50 @@ public class MainActivity extends Activity {
         FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
         preview.addView(mPreview);
 
+        preview. setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+
+                if (mCamera != null) {
+                    Camera camera = mCamera;
+                    camera.cancelAutoFocus();
+                    Rect focusRect = calculateFocusArea(event.getX(), event.getY());
+
+                    Camera.Parameters parameters = camera.getParameters();
+                    if (parameters.getFocusMode() != Camera.Parameters.FOCUS_MODE_AUTO) {
+                        parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
+                    }
+                    if (parameters.getMaxNumFocusAreas() > 0) {
+                        List<Camera.Area> mylist = new ArrayList<Camera.Area>();
+                        mylist.add(new Camera.Area(focusRect, 1000));
+                        parameters.setFocusAreas(mylist);
+                    }
+
+                    try {
+                        camera.cancelAutoFocus();
+                        camera.setParameters(parameters);
+                        camera.startPreview();
+                        camera.autoFocus(new Camera.AutoFocusCallback() {
+                            @Override
+                            public void onAutoFocus(boolean success, Camera camera) {
+                                if (camera.getParameters().getFocusMode() != Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE) {
+                                    Camera.Parameters parameters = camera.getParameters();
+                                    parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+                                    if (parameters.getMaxNumFocusAreas() > 0) {
+                                        parameters.setFocusAreas(null);
+                                    }
+                                    camera.setParameters(parameters);
+                                    camera.startPreview();
+                                }
+                            }
+                        });
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                return true;
+            }
+        });
 
         // Add a listener to the Capture button
         Button captureButton = (Button) findViewById(R.id.button_capture);
@@ -126,7 +177,14 @@ public class MainActivity extends Activity {
                     @Override
                     public void onClick(View v) {
                         // get an image from the camera
-                        mCamera.takePicture(null, null, mPicture);
+                        //mCamera.takePicture(null, null, mPicture);
+                        mCamera.autoFocus (new Camera.AutoFocusCallback() {
+                            public void onAutoFocus(boolean success, Camera camera) {
+                                    mCamera.takePicture(null, null, mPicture);
+
+                            }
+
+                        });
 
                     }
                 }
@@ -354,6 +412,27 @@ public class MainActivity extends Activity {
         startActivity(intent);
 
 
+    }
+
+    private Rect calculateFocusArea(float x, float y) {
+        int left = clamp(Float.valueOf((x / mPreview.getWidth()) * 2000 - 1000).intValue(), FOCUS_AREA_SIZE);
+        int top = clamp(Float.valueOf((y / mPreview.getHeight()) * 2000 - 1000).intValue(), FOCUS_AREA_SIZE);
+
+        return new Rect(left, top, left + FOCUS_AREA_SIZE, top + FOCUS_AREA_SIZE);
+    }
+
+    private int clamp(int touchCoordinateInCameraReper, int focusAreaSize) {
+        int result;
+        if (Math.abs(touchCoordinateInCameraReper)+focusAreaSize/2>1000){
+            if (touchCoordinateInCameraReper>0){
+                result = 1000 - focusAreaSize/2;
+            } else {
+                result = -1000 + focusAreaSize/2;
+            }
+        } else{
+            result = touchCoordinateInCameraReper - focusAreaSize/2;
+        }
+        return result;
     }
 
 
