@@ -1,0 +1,31 @@
+CREATE TABLE `filter_tags` (
+  `tag_id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `filter_id` int(11) unsigned NOT NULL,
+  `tag` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  PRIMARY KEY (`tag_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE `filters` (
+  `filter_id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `username` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `device_id` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `date_created` datetime NOT NULL,
+  `atr_brightness` double DEFAULT NULL,
+  `atr_contrast` double DEFAULT NULL,
+  `atr_saturation` double DEFAULT NULL,
+  `atr_sharpen` double DEFAULT NULL,
+  `atr_temperature` double DEFAULT NULL,
+  `atr_tint` double DEFAULT NULL,
+  `atr_vignette` double DEFAULT NULL,
+  `atr_grain` double DEFAULT NULL,
+  PRIMARY KEY (`filter_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE `filters_used` (
+  `used_id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `filter_id` int(11) unsigned NOT NULL,
+  `device_id` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `date_created` datetime NOT NULL,
+  PRIMARY KEY (`used_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

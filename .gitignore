@@ -44,3 +44,7 @@ captures/
 
 ### Android Patch ###
 gen-external-apklibs
+
+class_hidden.php
+
+class_hidden*
