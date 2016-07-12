@@ -24,7 +24,7 @@ public class PhotoConfirmActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_confirm_photo);
         GlobalVariables mApp = ((GlobalVariables)getApplicationContext());
-        Log.d("filepath in confirm", mApp.get_picture_path());
+        //Log.d("filepath in confirm", mApp.get_picture_path());
         Bitmap bitimg = BitmapFactory.decodeFile(mApp.get_picture_path());
 
         mImage = (ImageView)findViewById(R.id.imgView);
