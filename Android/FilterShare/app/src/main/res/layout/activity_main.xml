@@ -5,31 +5,52 @@
     android:layout_height="fill_parent"
     >
     <FrameLayout
-        android:id="@+id/camera_preview"
+        android:id="@+id/preview_parent"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        />
-
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center">
-        <Button
-            android:id="@+id/button_capture"
-            android:text="Capture"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+        android:layout_weight="1">
+        <FrameLayout
+            android:id="@+id/camera_preview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1">
+        </FrameLayout>
+
+        <team16.filtershare.AutofocusRect
+            android:id="@+id/af_rect"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:clipChildren="false">
+        </team16.filtershare.AutofocusRect>
+    </FrameLayout>
+
+    <RelativeLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:background="@android:color/holo_blue_dark">
 
         <Button
             android:id="@+id/button_gallery"
             android:text="Gallery"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:theme="@style/MyButton"
 
-            />
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true" />
 
-    </LinearLayout>
+        <Button
+            android:id="@+id/button_capture"
+            android:text="Capture"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:theme="@style/MyButton"
+
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true" />
+
+    </RelativeLayout>
 
 </LinearLayout>

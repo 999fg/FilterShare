@@ -46,6 +46,8 @@ public class MainActivity extends Activity {
     public static final int GALLERY_INTENT = 0;
     private static  final int FOCUS_AREA_SIZE= 300;
 
+    private static int isAf =0;
+
 
 
     private Camera.PictureCallback mPicture = new Camera.PictureCallback() {
@@ -61,8 +63,8 @@ public class MainActivity extends Activity {
 
             try {
                 FileOutputStream fos = new FileOutputStream(pictureFile, false);
-                fos.write(data);
-                fos.close();
+                //fos.write(data);
+                //fos.close();
 
                 fos = new FileOutputStream(pictureFile, false);
 
@@ -122,17 +124,26 @@ public class MainActivity extends Activity {
 
         // Create our Preview view and set it as the content of our activity.
         mPreview = new CameraPreview(this, mCamera);
-        FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
+        final FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
         preview.addView(mPreview);
+        final AutofocusRect mAutofocusRect = (AutofocusRect) findViewById(R.id.af_rect);
+        mAutofocusRect.setParentInfo(mPreview.getWidth(),mPreview.getHeight());
 
         preview. setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-
                 if (mCamera != null) {
+                    isAf=1;
                     Camera camera = mCamera;
                     camera.cancelAutoFocus();
                     Rect focusRect = calculateFocusArea(event.getX(), event.getY());
+                    Log.d("Rect", focusRect.toString());
+                    Log.d("Rect_ctr", "x: " + focusRect.centerX() +"y:"+ focusRect.centerY());
+                    Log.d("event_ctr", "x: " + event.getX() +"y:"+ event.getX());
+
+                    mAutofocusRect.setLocation(event.getX(), event.getY());
+                    mAutofocusRect.showStart();
+
 
                     Camera.Parameters parameters = camera.getParameters();
                     if (parameters.getFocusMode() != Camera.Parameters.FOCUS_MODE_AUTO) {
@@ -148,6 +159,7 @@ public class MainActivity extends Activity {
                         camera.cancelAutoFocus();
                         camera.setParameters(parameters);
                         camera.startPreview();
+
                         camera.autoFocus(new Camera.AutoFocusCallback() {
                             @Override
                             public void onAutoFocus(boolean success, Camera camera) {
@@ -158,6 +170,8 @@ public class MainActivity extends Activity {
                                         parameters.setFocusAreas(null);
                                     }
                                     camera.setParameters(parameters);
+                                    mAutofocusRect.clear();
+                                    isAf=0;
                                     camera.startPreview();
                                 }
                             }
@@ -178,9 +192,23 @@ public class MainActivity extends Activity {
                     public void onClick(View v) {
                         // get an image from the camera
                         //mCamera.takePicture(null, null, mPicture);
+                        Log.d("isAf", ""+isAf);
+                        if(isAf==1) {
+                            isAf=0;
+                            mAutofocusRect.clear();
+                            mCamera.takePicture(null, null, mPicture);
+
+                            return;
+                        }
+
+                        mAutofocusRect.setLocation(mPreview.getWidth()/2, mPreview.getHeight()/2);
+                        mAutofocusRect.showStart();
+                        mCamera.cancelAutoFocus();
+                        mCamera.startPreview();
                         mCamera.autoFocus (new Camera.AutoFocusCallback() {
                             public void onAutoFocus(boolean success, Camera camera) {
-                                    mCamera.takePicture(null, null, mPicture);
+                                mAutofocusRect.clear();
+                                mCamera.takePicture(null, null, mPicture);
 
                             }
 
@@ -291,6 +319,7 @@ public class MainActivity extends Activity {
         mPreview = new CameraPreview(this, mCamera);
         FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
         preview.addView(mPreview);
+
     }
 
 
@@ -434,6 +463,7 @@ public class MainActivity extends Activity {
         }
         return result;
     }
+
 
 
 
