@@ -38,7 +38,7 @@ public class MainActivity extends Activity {
 
     private Camera mCamera;
     private CameraPreview mPreview;
-    public static int cameraId=-1;
+    public static int cameraId=0;
     public static final int MEDIA_TYPE_IMAGE = 1;
     //This app doesn't use VIDEO but I left it just in case.
     public static final int MEDIA_TYPE_VIDEO = 2;
@@ -206,15 +206,22 @@ public class MainActivity extends Activity {
                         mAutofocusRect.showStart();
                         mCamera.cancelAutoFocus();
                         mCamera.startPreview();
-                        mCamera.autoFocus (new Camera.AutoFocusCallback() {
-                            public void onAutoFocus(boolean success, Camera camera) {
-                                Log.d("AutoFocus", "success: "+success);
-                                mAutofocusRect.clear();
-                                mCamera.takePicture(null, null, mPicture);
+                        boolean af_avail = getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_AUTOFOCUS);
+                        Log.d("autofocus available?", ""+af_avail );
+                        if(af_avail) {
+                            mCamera.autoFocus(new Camera.AutoFocusCallback() {
+                                public void onAutoFocus(boolean success, Camera camera) {
+                                    Log.d("AutoFocus", "success: " + success);
+                                    mAutofocusRect.clear();
+                                    mCamera.takePicture(null, null, mPicture);
 
-                            }
+                                }
 
-                        });
+                            });
+                        }
+                        else{
+                            mCamera.takePicture(null, null, mPicture);
+                        }
 
                     }
                 }
