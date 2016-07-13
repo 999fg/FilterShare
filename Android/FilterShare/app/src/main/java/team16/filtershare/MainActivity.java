@@ -90,11 +90,11 @@ public class MainActivity extends Activity {
 
             GlobalVariables mApp = ((GlobalVariables)getApplicationContext());
             mApp.set_picture_path(pictureFile.getAbsolutePath());
-            /*
+
             Intent intent = new Intent(MainActivity.this, PhotoConfirmActivity.class);
             startActivity(intent);
-            */
-            finish();
+
+            //finish();
 
         }
     };
@@ -163,6 +163,7 @@ public class MainActivity extends Activity {
                         camera.autoFocus(new Camera.AutoFocusCallback() {
                             @Override
                             public void onAutoFocus(boolean success, Camera camera) {
+                                Log.d("AutoFocus", "success: "+success);
                                 if (camera.getParameters().getFocusMode() != Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE) {
                                     Camera.Parameters parameters = camera.getParameters();
                                     parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
@@ -207,6 +208,7 @@ public class MainActivity extends Activity {
                         mCamera.startPreview();
                         mCamera.autoFocus (new Camera.AutoFocusCallback() {
                             public void onAutoFocus(boolean success, Camera camera) {
+                                Log.d("AutoFocus", "success: "+success);
                                 mAutofocusRect.clear();
                                 mCamera.takePicture(null, null, mPicture);
 
@@ -250,11 +252,11 @@ public class MainActivity extends Activity {
                     GlobalVariables mApp = ((GlobalVariables)getApplicationContext());
                     Log.d("filepath_gal", filepath);
                     mApp.set_picture_path(filepath);
-                    /*
+
                     Intent intent = new Intent(MainActivity.this, PhotoConfirmActivity.class);
                     startActivity(intent);
-                    */
-                    finish();
+
+                    //finish();
 
 
                 }
@@ -304,6 +306,18 @@ public class MainActivity extends Activity {
     protected void onStop(){
         super.onStop();
         releaseCamera();
+    }
+
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        releaseCamera();
+        /*
+        Intent intent = new Intent(MainActivity.this, PhotoConfirmActivity.class);
+        startActivity(intent);
+        */
+
+
     }
 
 
@@ -441,15 +455,7 @@ public class MainActivity extends Activity {
 
     }
 
-    @Override
-    public void onDestroy(){
-        super.onDestroy();
-        releaseCamera();
-        Intent intent = new Intent(MainActivity.this, PhotoConfirmActivity.class);
-        startActivity(intent);
 
-
-    }
 
     private Rect calculateFocusArea(float x, float y) {
         int left = clamp(Float.valueOf((x / mPreview.getWidth()) * 2000 - 1000).intValue(), FOCUS_AREA_SIZE);
