@@ -38,7 +38,7 @@ public class MainActivity extends Activity {
 
     private Camera mCamera;
     private CameraPreview mPreview;
-    public static int cameraId=0;
+    public static int cameraId=-1;
     public static final int MEDIA_TYPE_IMAGE = 1;
     //This app doesn't use VIDEO but I left it just in case.
     public static final int MEDIA_TYPE_VIDEO = 2;
@@ -300,6 +300,12 @@ public class MainActivity extends Activity {
         super.onPause();
         releaseCamera();              // release the camera immediately on pause event
     }
+    @Override
+    protected void onStop(){
+        super.onStop();
+        releaseCamera();
+    }
+
 
     @Override
     protected void onResume() {
@@ -330,10 +336,11 @@ public class MainActivity extends Activity {
         Camera c = null;
         try {
             Log.d("CameraNum", "Num: "+ Camera.getNumberOfCameras());
+            cameraId=findFrontFacingCamera();
             c = Camera.open(cameraId); // attempt to get a Camera instance
 
         } catch (Exception e) {
-            Log.e("NoCamera", "Camera 0 is no available");
+            Log.e("NoCamera", "Camera " +cameraId+ " is no available");
             // Camera is not available (in use or does not exist)
         }
         return c; // returns null if camera is unavailable
@@ -437,6 +444,7 @@ public class MainActivity extends Activity {
     @Override
     public void onDestroy(){
         super.onDestroy();
+        releaseCamera();
         Intent intent = new Intent(MainActivity.this, PhotoConfirmActivity.class);
         startActivity(intent);
 
@@ -462,6 +470,22 @@ public class MainActivity extends Activity {
             result = touchCoordinateInCameraReper - focusAreaSize/2;
         }
         return result;
+    }
+
+    private static int findFrontFacingCamera() {
+
+        // Search for the front facing camera
+        int numberOfCameras = Camera.getNumberOfCameras();
+        for (int i = 0; i < numberOfCameras; i++) {
+            Camera.CameraInfo info = new Camera.CameraInfo();
+            Camera.getCameraInfo(i, info);
+            if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+                cameraId = i;
+
+                break;
+            }
+        }
+        return cameraId;
     }
 
 
