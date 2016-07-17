@@ -18,8 +18,8 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import java.io.File;
@@ -47,6 +47,11 @@ public class MainActivity extends Activity {
     private static  final int FOCUS_AREA_SIZE= 300;
 
     private static int isAf =0;
+    private static boolean hasAutoFocus;
+    private static AutofocusRect mAutofocusRect = null;
+    private static int front_camera = -1;
+    private static int back_camera = -1;
+    private static int current_camera = -1;
 
 
 
@@ -71,7 +76,14 @@ public class MainActivity extends Activity {
                 Bitmap realImage = BitmapFactory.decodeByteArray(data, 0, data.length);
                 //Log.d("absolute", pictureFile.getAbsolutePath());
                 //Log.d("tostring", pictureFile.toString());
-                realImage= rotate(realImage, 90);
+                if(cameraId==back_camera) {
+                    Log.d("save", "back");
+                    realImage = rotate(realImage, 90, false);
+                }
+                else {
+                    Log.d("save", "front");
+                    realImage = rotate(realImage, 90, true);
+                }
                 Uri.fromFile(pictureFile).getPath();
                 Log.d("Uri", Uri.fromFile(pictureFile).getPath());
                 realImage=rotate_image(Uri.fromFile(pictureFile).getPath(),realImage);
@@ -108,13 +120,14 @@ public class MainActivity extends Activity {
         // Create an instance of Camera
         if(checkCameraHardware(this)) {
             Log.d("Ok", "It has camera");
+            assignCameraId();
+
             mCamera = getCameraInstance();
+            List<String> supportedFocusModes = mCamera.getParameters().getSupportedFocusModes();
+            hasAutoFocus = supportedFocusModes != null && supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO);
 
 
-            //set camera to continually auto-focus
-            Camera.Parameters params = mCamera.getParameters();
-            params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
-            mCamera.setParameters(params);
+
 
             if (mCamera==null)
                 Log.e("Fail", "no Camera Instance");
@@ -122,122 +135,45 @@ public class MainActivity extends Activity {
         else
             Log.e("NO", "checkCameraHardware failed");
 
-        // Create our Preview view and set it as the content of our activity.
-        mPreview = new CameraPreview(this, mCamera);
-        final FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
-        preview.addView(mPreview);
-        final AutofocusRect mAutofocusRect = (AutofocusRect) findViewById(R.id.af_rect);
-        mAutofocusRect.setParentInfo(mPreview.getWidth(),mPreview.getHeight());
+        //set camera to continually auto-focus
+        setViews();
 
-        preview. setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if (mCamera != null) {
-                    isAf=1;
-                    Camera camera = mCamera;
-                    camera.cancelAutoFocus();
-                    Rect focusRect = calculateFocusArea(event.getX(), event.getY());
-                    Log.d("Rect", focusRect.toString());
-                    Log.d("Rect_ctr", "x: " + focusRect.centerX() +"y:"+ focusRect.centerY());
-                    Log.d("event_ctr", "x: " + event.getX() +"y:"+ event.getX());
-
-                    mAutofocusRect.setLocation(event.getX(), event.getY());
-                    mAutofocusRect.showStart();
-
-
-                    Camera.Parameters parameters = camera.getParameters();
-                    if (parameters.getFocusMode() != Camera.Parameters.FOCUS_MODE_AUTO) {
-                        parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
-                    }
-                    if (parameters.getMaxNumFocusAreas() > 0) {
-                        List<Camera.Area> mylist = new ArrayList<Camera.Area>();
-                        mylist.add(new Camera.Area(focusRect, 1000));
-                        parameters.setFocusAreas(mylist);
-                    }
-
-                    try {
-                        camera.cancelAutoFocus();
-                        camera.setParameters(parameters);
-                        camera.startPreview();
-
-                        camera.autoFocus(new Camera.AutoFocusCallback() {
-                            @Override
-                            public void onAutoFocus(boolean success, Camera camera) {
-                                Log.d("AutoFocus", "success: "+success);
-                                if (camera.getParameters().getFocusMode() != Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE) {
-                                    Camera.Parameters parameters = camera.getParameters();
-                                    parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
-                                    if (parameters.getMaxNumFocusAreas() > 0) {
-                                        parameters.setFocusAreas(null);
-                                    }
-                                    camera.setParameters(parameters);
-                                    mAutofocusRect.clear();
-                                    isAf=0;
-                                    camera.startPreview();
-                                }
-                            }
-                        });
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-                return true;
-            }
-        });
-
-        // Add a listener to the Capture button
-        Button captureButton = (Button) findViewById(R.id.button_capture);
-        captureButton.setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        // get an image from the camera
-                        //mCamera.takePicture(null, null, mPicture);
-                        Log.d("isAf", ""+isAf);
-                        if(isAf==1) {
-                            isAf=0;
-                            mAutofocusRect.clear();
-                            mCamera.takePicture(null, null, mPicture);
-
-                            return;
-                        }
-
-                        mAutofocusRect.setLocation(mPreview.getWidth()/2, mPreview.getHeight()/2);
-                        mAutofocusRect.showStart();
-                        mCamera.cancelAutoFocus();
-                        mCamera.startPreview();
-                        boolean af_avail = getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_AUTOFOCUS);
-                        Log.d("autofocus available?", ""+af_avail );
-                        if(af_avail) {
-                            mCamera.autoFocus(new Camera.AutoFocusCallback() {
-                                public void onAutoFocus(boolean success, Camera camera) {
-                                    Log.d("AutoFocus", "success: " + success);
-                                    mAutofocusRect.clear();
-                                    mCamera.takePicture(null, null, mPicture);
-
-                                }
-
-                            });
-                        }
-                        else{
-                            mCamera.takePicture(null, null, mPicture);
-                        }
-
-                    }
-                }
-        );
-
-        Button galleryButton = (Button) findViewById(R.id.button_gallery);
-        galleryButton.setOnClickListener(
+        ImageButton changeButton = (ImageButton) findViewById(R.id.change_camera);
+        changeButton.setOnClickListener(
                 new View.OnClickListener(){
                     @Override
                     public void onClick(View v){
-                        Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                        startActivityForResult(intent, GALLERY_INTENT);
+                        mCamera.release();
+                        if(cameraId == front_camera && back_camera!=-1){
+                            cameraId = back_camera;
+                        }
+                        else if(cameraId == back_camera && front_camera!=-1){
+                            cameraId = front_camera;
+                        }
+                        FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
+                        preview.removeView(mPreview);
+
+
+                        mCamera=getCameraInstance();
+                        List<String> supportedFocusModes = mCamera.getParameters().getSupportedFocusModes();
+                        hasAutoFocus = supportedFocusModes != null && supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO);
+                        Log.d("change_autofocus", "change_auto?: "+hasAutoFocus);
+                        setViews();
+
+
+                        // Create our Preview view and set it as the content of our activity.
+                        mPreview = new CameraPreview(MainActivity.this, mCamera);
+                        preview.addView(mPreview);
+
+
 
                     }
                 }
         );
+
+
+
+
     }
 
 
@@ -294,7 +230,7 @@ public class MainActivity extends Activity {
     /**
      * Check if this device has a camera
      */
-    private boolean checkCameraHardware(Context context) {
+    private static boolean checkCameraHardware(Context context) {
         if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
             // this device has a camera
             return true;
@@ -357,7 +293,9 @@ public class MainActivity extends Activity {
         Camera c = null;
         try {
             Log.d("CameraNum", "Num: "+ Camera.getNumberOfCameras());
-            cameraId=findFrontFacingCamera();
+            //cameraId = 0;
+            Log.d("CameraId", "cameraId: "+ cameraId);
+
             c = Camera.open(cameraId); // attempt to get a Camera instance
 
         } catch (Exception e) {
@@ -431,13 +369,19 @@ public class MainActivity extends Activity {
     }
 
 
-    public static Bitmap rotate(Bitmap bitmap, int degree) {
+    public static Bitmap rotate(Bitmap bitmap, int degree, boolean front) {
         int w = bitmap.getWidth();
         int h = bitmap.getHeight();
 
         Matrix mtx = new Matrix();
         //       mtx.postRotate(degree);
-        mtx.setRotate(degree);
+        if(front){
+            Log.d("mirror", "true");
+
+            mtx.preScale(-1.0f, 1.0f);
+        }
+
+        mtx.postRotate(degree);
 
         return Bitmap.createBitmap(bitmap, 0, 0, w, h, mtx, true);
     }
@@ -450,11 +394,11 @@ public class MainActivity extends Activity {
 
         // refer http://sylvana.net/jpegcrop/exif_orientation.html to understand to code below
         if(exif.getAttribute(ExifInterface.TAG_ORIENTATION).equalsIgnoreCase("6")){
-            realImage= rotate(realImage, 90);
+            realImage= rotate(realImage, 90, false);
         } else if(exif.getAttribute(ExifInterface.TAG_ORIENTATION).equalsIgnoreCase("8")){
-            realImage= rotate(realImage, 270);
+            realImage= rotate(realImage, 270, false);
         } else if(exif.getAttribute(ExifInterface.TAG_ORIENTATION).equalsIgnoreCase("3")){
-            realImage= rotate(realImage, 180);
+            realImage= rotate(realImage, 180, false);
         } /*else if(exif.getAttribute(ExifInterface.TAG_ORIENTATION).equalsIgnoreCase("0")){
             realImage= rotate(realImage, 90);
         } */
@@ -485,7 +429,7 @@ public class MainActivity extends Activity {
         return result;
     }
 
-    private static int findFrontFacingCamera() {
+    private static void assignCameraId() {
 
         // Search for the front facing camera
         int numberOfCameras = Camera.getNumberOfCameras();
@@ -493,19 +437,168 @@ public class MainActivity extends Activity {
             Camera.CameraInfo info = new Camera.CameraInfo();
             Camera.getCameraInfo(i, info);
             if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
-                cameraId = i;
-
-                break;
+                front_camera = i;
+            }
+            else if(info.facing == Camera.CameraInfo.CAMERA_FACING_BACK){
+                back_camera = i;
             }
         }
-        return cameraId;
+        if(cameraId==-1) {
+            if (back_camera != -1) {
+                cameraId = back_camera;
+            } else if (front_camera != -1) {
+                cameraId = front_camera;
+            }
+        }
     }
 
+    private void setViews(){
+        if (hasAutoFocus) {
+            Camera.Parameters params = mCamera.getParameters();
+            params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+            mCamera.setParameters(params);
+        }
+        // Create our Preview view and set it as the content of our activity.
+        mPreview = new CameraPreview(this, mCamera);
+        final FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
+        preview.addView(mPreview);
+
+        if (hasAutoFocus) {
+            mAutofocusRect = (AutofocusRect) findViewById(R.id.af_rect);
+            mAutofocusRect.setParentInfo(mPreview.getWidth(), mPreview.getHeight());
+
+            preview.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    if (mCamera != null) {
+                        isAf = 1;
+                        Camera camera = mCamera;
+                        camera.cancelAutoFocus();
+                        Rect focusRect = calculateFocusArea(event.getX(), event.getY());
+                        Log.d("Rect", focusRect.toString());
+                        Log.d("Rect_ctr", "x: " + focusRect.centerX() + "y:" + focusRect.centerY());
+                        Log.d("event_ctr", "x: " + event.getX() + "y:" + event.getX());
+
+                        mAutofocusRect.setLocation(event.getX(), event.getY());
+                        mAutofocusRect.showStart();
 
 
+                        Camera.Parameters parameters = camera.getParameters();
+                        if (parameters.getFocusMode() != Camera.Parameters.FOCUS_MODE_AUTO) {
+                            parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
+                        }
+                        if (parameters.getMaxNumFocusAreas() > 0) {
+                            List<Camera.Area> mylist = new ArrayList<Camera.Area>();
+                            mylist.add(new Camera.Area(focusRect, 1000));
+                            parameters.setFocusAreas(mylist);
+                        }
+
+                        try {
+                            camera.cancelAutoFocus();
+                            camera.setParameters(parameters);
+                            camera.startPreview();
+
+                            camera.autoFocus(new Camera.AutoFocusCallback() {
+                                @Override
+                                public void onAutoFocus(boolean success, Camera camera) {
+                                    Log.d("AutoFocus", "success: " + success);
+                                    if (camera.getParameters().getFocusMode() != Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE) {
+                                        Camera.Parameters parameters = camera.getParameters();
+                                        parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+                                        if (parameters.getMaxNumFocusAreas() > 0) {
+                                            parameters.setFocusAreas(null);
+                                        }
+                                        camera.setParameters(parameters);
+                                        mAutofocusRect.clear();
+
+                                        isAf = 0;
+                                        camera.startPreview();
+                                    }
+                                }
+                            });
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    return true;
+                }
+            });
+        }
+
+        else{
+            preview.setOnTouchListener(new View.OnTouchListener(){
+                   @Override
+                   public boolean onTouch(View v, MotionEvent event) {
+                       return true;
+                   }
+
+            });
+
+        }
+
+        if(hasAutoFocus) {
+            // Add a listener to the Capture button
+            ImageButton captureButton = (ImageButton) findViewById(R.id.button_capture);
+            captureButton.setOnClickListener(
+                    new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            // get an image from the camera
+                            //mCamera.takePicture(null, null, mPicture);
+
+                            Log.d("isAf", "" + isAf);
+                            if (isAf == 1) {
+                                isAf = 0;
+                                mAutofocusRect.clear();
+                                mCamera.takePicture(null, null, mPicture);
+
+                                return;
+                            }
+
+                            mAutofocusRect.setLocation(mPreview.getWidth() / 2, mPreview.getHeight() / 2);
+                            mAutofocusRect.showStart();
+                            mCamera.cancelAutoFocus();
+                            mCamera.startPreview();
+
+                            mCamera.autoFocus(new Camera.AutoFocusCallback() {
+                                public void onAutoFocus(boolean success, Camera camera) {
+                                    Log.d("AutoFocus", "success: " + success);
+                                    mAutofocusRect.clear();
+                                    mCamera.takePicture(null, null, mPicture);
+
+                                }
+
+                            });
 
 
+                        }
+                    }
+            );
+        }
+        else {
+            ImageButton captureButton = (ImageButton) findViewById(R.id.button_capture);
+            captureButton.setOnClickListener(
+                    new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            mCamera.takePicture(null, null, mPicture);
+
+                        }
+                    }
+            );
+        }
 
 
+        ImageButton galleryButton = (ImageButton) findViewById(R.id.button_gallery);
+        galleryButton.setOnClickListener(
+                new View.OnClickListener(){
+                    @Override
+                    public void onClick(View v){
+                        Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                        startActivityForResult(intent, GALLERY_INTENT);
 
+                    }
+                }
+        );
+    }
 }
