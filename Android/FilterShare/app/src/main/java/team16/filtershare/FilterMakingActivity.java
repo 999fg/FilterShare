@@ -3,6 +3,7 @@ package team16.filtershare;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.media.effect.Effect;
 import android.media.effect.EffectContext;
 import android.media.effect.EffectFactory;
@@ -14,18 +15,24 @@ import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
+import android.widget.TextView;
+
+import org.w3c.dom.Text;
+
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 /**
  * Created by shinjaemin on 2016. 7. 6..
  */
+
 public class FilterMakingActivity extends AppCompatActivity implements GLSurfaceView.Renderer, View.OnClickListener{
     private GLSurfaceView mEffectView;
-    private int[] mTextures = new int[2];
+    private int[] mTextures = new int[3];
     private EffectContext mEffectContext;
     private Effect mEffect;
     private TextureRenderer mTexRenderer = new TextureRenderer();
@@ -34,7 +41,13 @@ public class FilterMakingActivity extends AppCompatActivity implements GLSurface
     private boolean mInitialized = false;
     int mCurrentEffect;
 
-    private int brProgress;
+    private int progress = 0;
+    private int origProgress = 0;
+    private FilterEffect currentEffect = null;
+    private Effect[] mEffectArray = new Effect[8];
+    private boolean[] isEffectApplied = new boolean[]{false, false, false, false, false, false, false, false};
+    private int mEffectCount = 0;
+    private int firstEffect = 0;
 
     public void setCurrentEffect(int effect) {
         mCurrentEffect = effect;
@@ -45,6 +58,11 @@ public class FilterMakingActivity extends AppCompatActivity implements GLSurface
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_make_filter);
 
+        LinearLayout bottomBar = (LinearLayout) findViewById(R.id.bottom_bar);
+        //Inflate the slider view
+        View selectEffectView = getLayoutInflater().inflate(R.layout.activity_select_effect, bottomBar, false);
+        bottomBar.addView(selectEffectView);
+
         /* Initial settings for image preview (GLSurfaceView) */
         mEffectView = (GLSurfaceView) findViewById(R.id.imgPreview);
         mEffectView.setEGLContextClientVersion(2);
@@ -52,23 +70,24 @@ public class FilterMakingActivity extends AppCompatActivity implements GLSurface
         mEffectView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
         mCurrentEffect = R.id.none;
 
+        // Initialize buttons for 8 filter effects
         Button brightness_button = (Button) findViewById(R.id.brightness_button);
-        Button contrast_button = (Button) findViewById(R.id.contrast_button);
-        Button saturation_button = (Button) findViewById(R.id.saturation_button);
-        Button sharpen_button = (Button) findViewById(R.id.sharpen_button);
-        Button temperature_button = (Button) findViewById(R.id.temperature_button);
-        Button tint_button = (Button) findViewById(R.id.tint_button);
-        Button vignette_button = (Button) findViewById(R.id.vignette_button);
-        Button grain_button = (Button) findViewById(R.id.grain_button);
-
         brightness_button.setOnClickListener(this);
+        Button contrast_button = (Button) findViewById(R.id.contrast_button);
         contrast_button.setOnClickListener(this);
+        Button saturation_button = (Button) findViewById(R.id.saturation_button);
         saturation_button.setOnClickListener(this);
+        Button sharpen_button = (Button) findViewById(R.id.sharpen_button);
         sharpen_button.setOnClickListener(this);
+        Button temperature_button = (Button) findViewById(R.id.temperature_button);
         temperature_button.setOnClickListener(this);
+        Button tint_button = (Button) findViewById(R.id.tint_button);
         tint_button.setOnClickListener(this);
+        Button vignette_button = (Button) findViewById(R.id.vignette_button);
         vignette_button.setOnClickListener(this);
+        Button grain_button = (Button) findViewById(R.id.grain_button);
         grain_button.setOnClickListener(this);
+
 
         final Button change_image_button = (Button) findViewById(R.id.change_image_button);
         change_image_button.setOnClickListener(new View.OnClickListener() {
@@ -91,53 +110,59 @@ public class FilterMakingActivity extends AppCompatActivity implements GLSurface
     public void onClick(View v) {
         switch(v.getId()){
             case R.id.brightness_button:
-                //Check if the Layout already exists
-                LinearLayout seek_bar = (LinearLayout)findViewById(R.id.seekBar);
-                if(seek_bar == null){
-                    //Inflate the Hidden Layout Information View
-                    LinearLayout myLayout = (LinearLayout)findViewById(R.id.seekBarLayout);
-                    View hiddenInfo = getLayoutInflater().inflate(R.layout.activity_make_filter_slider, myLayout, false);
-                    myLayout.addView(hiddenInfo);
-                }
-                SeekBar br_seekbar = (SeekBar) findViewById(R.id.brSeekBar);
-                br_seekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                    @Override
-                    public void onProgressChanged(SeekBar seekBar, int progress, boolean b) {
-                    }
-                    @Override
-                    public void onStartTrackingTouch(SeekBar seekBar) {
-                    }
-                    @Override
-                    public void onStopTrackingTouch(SeekBar seekBar) {
-                        brProgress = seekBar.getProgress();
-                        Log.d("brProgress", Integer.toString(brProgress));
-                        mEffectView.requestRender();
-                    }
-                });
+                currentEffect = FilterEffect.BRIGHTNESS;
+                inflateSlider();
                 break;
             case R.id.contrast_button:
+                currentEffect = FilterEffect.CONTRAST;
+                inflateSlider();
                 break;
             case R.id.saturation_button:
+                currentEffect = FilterEffect.SATURATION;
+                inflateSlider();
                 break;
             case R.id.sharpen_button:
+                currentEffect = FilterEffect.SHARPEN;
+                inflateSlider();
                 break;
             case R.id.temperature_button:
+                currentEffect = FilterEffect.TEMPERATURE;
+                inflateSlider();
                 break;
             case R.id.tint_button:
+                currentEffect = FilterEffect.TINT;
+                inflateSlider();
                 break;
             case R.id.vignette_button:
+                currentEffect = FilterEffect.VIGNETTE;
+                inflateSlider();
                 break;
             case R.id.grain_button:
+                currentEffect = FilterEffect.GRAIN;
+                inflateSlider();
+                break;
+            case R.id.cancel_button:
+                Log.d("Seek bar layout", "CANCEL button");
+                inflateEffects();
+                progress = origProgress;
+                Log.d("CANCEL orig progress", Integer.toString(progress));
+                mEffectView.requestRender();
+                break;
+            case R.id.done_button:
+                Log.d("Seek bar layout", "DONE button");
+                SeekBar seekBar = (SeekBar) findViewById(R.id.seek_bar);
+                currentEffect.setValue(seekBar.getProgress());
+                inflateEffects();
                 break;
         }
     }
     private void loadTextures() {
         // Generate textures
-        GLES20.glGenTextures(2, mTextures, 0);
+        GLES20.glGenTextures(3, mTextures, 0);
 
         // Load input bitmap
         Bitmap bitmap = BitmapFactory.decodeResource(getResources(),
-                R.drawable.test_horizontal);
+                R.drawable.test_vertical);
         mImageWidth = bitmap.getWidth();
         mImageHeight = bitmap.getHeight();
         mTexRenderer.updateTextureSize(mImageWidth, mImageHeight);
@@ -155,24 +180,123 @@ public class FilterMakingActivity extends AppCompatActivity implements GLSurface
         /*
         if (mEffect != null) {
             mEffect.release();
+        }*/
+
+        switch (currentEffect) {
+            case BRIGHTNESS:
+                Log.d("BR PROGRESS:", Integer.toString(progress));
+                mEffectArray[0] = effectFactory.createEffect(EffectFactory.EFFECT_BRIGHTNESS);
+                mEffectArray[0].setParameter("brightness", ((float) progress / 100) + 1.0f);
+                isEffectApplied[0] = true;
+                if (mEffectCount == 0) {
+                    firstEffect = 0;
+                    mEffectCount++;
+                }
+                break;
+            case CONTRAST:
+                Log.d("CT PROGRESS:", Integer.toString(progress));
+                mEffectArray[1] = effectFactory.createEffect(EffectFactory.EFFECT_CONTRAST);
+                mEffectArray[1].setParameter("contrast", ((float) progress / 100) + 1.0f);
+                isEffectApplied[1] = true;
+                if (mEffectCount == 0) {
+                    firstEffect = 1;
+                    mEffectCount++;
+                }
+                break;
+            case SATURATION:
+                Log.d("ST PROGRESS:", Integer.toString(progress));
+                mEffectArray[2] = effectFactory.createEffect(
+                        EffectFactory.EFFECT_SATURATE);
+                mEffectArray[2].setParameter("scale", (((float) progress / 100) - 0.5f) * 2);
+                isEffectApplied[2] = true;
+                if (mEffectCount == 0) {
+                    firstEffect = 2;
+                    mEffectCount++;
+                }
+                break;
+            case SHARPEN:
+                Log.d("SH PROGRESS:", Integer.toString(progress));
+                mEffectArray[3] = effectFactory.createEffect(
+                        EffectFactory.EFFECT_SHARPEN);
+                mEffectArray[3].setParameter("scale", ((float) progress / 100));
+                isEffectApplied[3] = true;
+                if (mEffectCount == 0) {
+                    firstEffect = 3;
+                    mEffectCount++;
+                }
+                break;
+            case TEMPERATURE:
+                Log.d("TM PROGRESS:", Integer.toString(progress));
+                mEffectArray[4] = effectFactory.createEffect(
+                        EffectFactory.EFFECT_TEMPERATURE);
+                mEffectArray[4].setParameter("scale", ((float) progress / 100));
+                isEffectApplied[4] = true;
+                if (mEffectCount == 0) {
+                    firstEffect = 4;
+                    mEffectCount++;
+                }
+                break;
+            case TINT:
+                Log.d("TN PROGRESS:", Integer.toString(progress));
+                mEffectArray[5] = effectFactory.createEffect(
+                        EffectFactory.EFFECT_TINT);
+                mEffectArray[5].setParameter("tint", Color.MAGENTA);
+                isEffectApplied[5] = true;
+                if (mEffectCount == 0) {
+                    firstEffect = 5;
+                    mEffectCount++;
+                }
+                break;
+            case VIGNETTE:
+                Log.d("VG PROGRESS:", Integer.toString(progress));
+                mEffectArray[6] = effectFactory.createEffect(
+                        EffectFactory.EFFECT_VIGNETTE);
+                mEffectArray[6].setParameter("scale", ((float) progress / 100));
+                isEffectApplied[6] = true;
+                if (mEffectCount == 0) {
+                    firstEffect = 6;
+                    mEffectCount++;
+                }
+                break;
+            case GRAIN:
+                Log.d("GR PROGRESS:", Integer.toString(progress));
+                mEffectArray[7] = effectFactory.createEffect(
+                        EffectFactory.EFFECT_GRAIN);
+                mEffectArray[7].setParameter("strength", ((float) progress / 100));
+                isEffectApplied[7] = true;
+                if (mEffectCount == 0) {
+                    firstEffect = 7;
+                    mEffectCount++;
+                }
+                break;
+            default:
+                break;
         }
-        */
-        mEffect = effectFactory.createEffect(EffectFactory.EFFECT_BRIGHTNESS);
-        Log.d("BR PROGRESS:", Integer.toString(progress));
-        mEffect.setParameter("brightness", ((float) progress / 100) + 1.0f);
+
     }
     private void applyEffect() {
-        mEffect.apply(mTextures[0], mImageWidth, mImageHeight, mTextures[1]);
+        if (mEffectCount > 0) {
+            mEffectArray[firstEffect].apply(mTextures[0], mImageWidth, mImageHeight, mTextures[1]);
+            for (FilterEffect f : FilterEffect.values()) { // if more that one effect
+                if (isEffectApplied[f.ordinal()]) {
+                    int sourceTexture = mTextures[1];
+                    int destinationTexture = mTextures[2];
+                    mEffectArray[f.ordinal()].apply(sourceTexture, mImageWidth, mImageHeight, destinationTexture);
+                    mTextures[1] = destinationTexture; // changing the textures array, so 1 is always the texture for output,
+                    mTextures[2] = sourceTexture; // 2 is always the sparse texture
+                }
+            }
+        }
     }
 
     private void renderResult() {
-        //if (mCurrentEffect != R.id.none) {
+        if (currentEffect != null) {
             // if no effect is chosen, just render the original bitmap
             mTexRenderer.renderTexture(mTextures[1]);
-        /*} else {
+        } else {
             // render the result of applyEffect()
             mTexRenderer.renderTexture(mTextures[0]);
-        }*/
+        }
     }
 
     @Override
@@ -185,11 +309,12 @@ public class FilterMakingActivity extends AppCompatActivity implements GLSurface
             mInitialized = true;
         }
         //if (mCurrentEffect != R.id.none) {
-        Log.d("IN", "HERE");
-        //if an effect is chosen initialize it and apply it to the texture
-        initEffect(brProgress);
-        applyEffect();
-        //}
+        if (currentEffect != null) {
+            Log.d("IN", "HERE");
+            //if an effect is chosen initialize it and apply it to the texture
+            initEffect(progress);
+            applyEffect();
+        }
         renderResult();
     }
 
@@ -202,6 +327,95 @@ public class FilterMakingActivity extends AppCompatActivity implements GLSurface
 
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
+    }
+
+    private void inflateSlider() {
+        //Check if seek bar layout already exists i.e. if it's slider mode
+        LinearLayout seekBarLayout = (LinearLayout) findViewById(R.id.seek_bar_layout);
+        Log.d("Inflate slider", "IN");
+        // Remove existing select effect view
+        View bottomBar = findViewById(R.id.select_effect_layout);
+        ViewGroup parent = (ViewGroup)bottomBar.getParent();
+        int index = parent.indexOfChild(bottomBar);
+        parent.removeView(bottomBar);
+
+        //Inflate the slider view
+        bottomBar = getLayoutInflater().inflate(R.layout.activity_make_filter_slider, parent, false);
+        parent.addView(bottomBar, index);
+
+        Button cancelButton = (Button) findViewById(R.id.cancel_button);
+        cancelButton.setOnClickListener(this);
+
+        Button doneButton = (Button) findViewById(R.id.done_button);
+        doneButton.setOnClickListener(this);
+
+        origProgress = (int) currentEffect.getValue();
+        SeekBar seekBar = (SeekBar) findViewById(R.id.seek_bar);
+        seekBar.setProgress(origProgress);
+        TextView seekBarValue = (TextView) findViewById(R.id.seek_bar_value);
+        seekBarValue.setText(Integer.toString(origProgress));
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean b) {
+            }
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                progress = seekBar.getProgress();
+                Log.d("progress", Integer.toString(progress));
+                mEffectView.requestRender();
+
+                TextView seekBarValue = (TextView) findViewById(R.id.seek_bar_value);
+                seekBarValue.setText(Integer.toString(progress));
+            }
+        });
+
+    }
+
+    private void inflateEffects() {
+        View bottomBar = findViewById(R.id.seek_bar_layout);
+        ViewGroup parent = (ViewGroup)bottomBar.getParent();
+        int index = parent.indexOfChild(bottomBar);
+        parent.removeView(bottomBar);
+
+        //Inflate the slider view
+        bottomBar = getLayoutInflater().inflate(R.layout.activity_select_effect, parent, false);
+        parent.addView(bottomBar, index);
+        Button brightness_button = (Button) findViewById(R.id.brightness_button);
+        brightness_button.setOnClickListener(this);
+        Button contrast_button = (Button) findViewById(R.id.contrast_button);
+        contrast_button.setOnClickListener(this);
+        Button saturation_button = (Button) findViewById(R.id.saturation_button);
+        saturation_button.setOnClickListener(this);
+        Button sharpen_button = (Button) findViewById(R.id.sharpen_button);
+        sharpen_button.setOnClickListener(this);
+        Button temperature_button = (Button) findViewById(R.id.temperature_button);
+        temperature_button.setOnClickListener(this);
+        Button tint_button = (Button) findViewById(R.id.tint_button);
+        tint_button.setOnClickListener(this);
+        Button vignette_button = (Button) findViewById(R.id.vignette_button);
+        vignette_button.setOnClickListener(this);
+        Button grain_button = (Button) findViewById(R.id.grain_button);
+        grain_button.setOnClickListener(this);
+
+        final Button change_image_button = (Button) findViewById(R.id.change_image_button);
+        change_image_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(FilterMakingActivity.this, PhotoConfirmActivity.class);
+                startActivity(intent);
+            }
+        });
+        final Button next_button = (Button) findViewById(R.id.next_button);
+        next_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(FilterMakingActivity.this, FilterMakingConfirmActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 }
 

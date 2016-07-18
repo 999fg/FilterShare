@@ -4,7 +4,6 @@
     android:layout_height="match_parent"
     android:gravity="center"
     android:weightSum="1">
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="400dp">
@@ -17,79 +16,15 @@
     </LinearLayout>
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/seekBarLayout"
-        android:orientation="vertical">
-    </LinearLayout>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:weightSum="8">
-        <Button
-            android:id="@+id/brightness_button"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:text="BR"
-            android:layout_weight="1"/>
-        <Button
-            android:id="@+id/contrast_button"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:text="CT"
-            android:layout_weight="1"/>
-        <Button
-            android:id="@+id/saturation_button"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:text="ST"
-            android:layout_weight="1"/>
-        <Button
-            android:id="@+id/sharpen_button"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:text="SH"
-            android:layout_weight="1"/>
-        <Button
-            android:id="@+id/temperature_button"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:text="TM"
-            android:layout_weight="1"/>
-        <Button
-            android:id="@+id/tint_button"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:text="TN"
-            android:layout_weight="1"/>
-        <Button
-            android:id="@+id/vignette_button"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:text="VG"
-            android:layout_weight="1"/>
-        <Button
-            android:id="@+id/grain_button"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:text="GR"
-            android:layout_weight="1"/>
-    </LinearLayout>
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <Button
-            android:id="@+id/change_image_button"
-            android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:id="@+id/bottom_bar">
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Change Image"
-            android:theme="@style/MyButton"/>
-        <Button
-            android:id="@+id/next_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Next"
-            android:theme="@style/MyButton"/>
+            android:id="@+id/bottom_bar_layout"
+            android:orientation="vertical"
+            >
+        </LinearLayout>
     </LinearLayout>
 </LinearLayout>
