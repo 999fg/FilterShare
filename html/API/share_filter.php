@@ -18,6 +18,7 @@ $attributes = array('sharpen' => 10, 'contrast' => 4);
 
 if(!$name || !$username || !$device_id || !$attributes) {
 	echo "Invalid Parameters";
+	exit();
 }
 
 $tags = str_replace('#', '', $tags);
@@ -68,6 +69,6 @@ foreach($tags_array as $tag) {
 	'tag' => $tag));
 }
 
-echo encodeData(NULL);
+echo encodeData(array('filter_id' => $filter_id));
 
 ?>
