@@ -64,7 +64,8 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 
         // start preview with new settings
         try {
-            setCameraDisplayOrientation((Activity)getContext(), MainActivity.cameraId,mCamera);
+            //setCameraDisplayOrientation((Activity)getContext(), MainActivity.cameraId,mCamera);
+            mCamera.setDisplayOrientation(90);
             mCamera.setPreviewDisplay(mHolder);
             mCamera.startPreview();
 
@@ -82,6 +83,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         int rotation = activity.getWindowManager().getDefaultDisplay()
                 .getRotation();
         int degrees = 0;
+
         switch (rotation) {
             case Surface.ROTATION_0: degrees = 0; break; //Natural orientation
             case Surface.ROTATION_90: degrees = 90; break; //Landscape left
