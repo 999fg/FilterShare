@@ -1,7 +1,5 @@
 package team16.filtershare;
 
-import android.util.Log;
-
 import com.google.gson.JsonObject;
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
@@ -10,9 +8,9 @@ import com.koushikdutta.ion.Ion;
  * Created by harrykim on 2016. 7. 13..
  */
 public class ServerConnector {
-    private static JsonObject server_result;
+    //private static JsonObject server_result;
 
-    public static JsonObject uploadToServer(JsonObject jsonobj, String url_tail) {
+    public static void uploadToServer(JsonObject jsonobj, FutureCallback<JsonObject> fcallback, String url_tail) {
 
 
         //server_address = "domain address" + url tail
@@ -20,7 +18,9 @@ public class ServerConnector {
         Ion.with(GlobalVariables.getAppContext())
                 .load("http://52.52.31.137"+url_tail)
                 .setJsonObjectBody(jsonobj)
-                .asJsonObject()
+                .asJsonObject().setCallback(fcallback);
+
+                /*
                 .setCallback(new FutureCallback<JsonObject>() {
                     @Override
                     public void onCompleted(Exception e, JsonObject result) {
@@ -31,6 +31,7 @@ public class ServerConnector {
                     }
                 });
         return server_result;
+                */
         /*
         //server_address = "domain address" + url tail
         //For example "http://52.52.31.137" + "API/share_filter.php"
@@ -75,12 +76,13 @@ public class ServerConnector {
     }
 
 
-    public static JsonObject GetFromServer(String url_tail) {
+    public static void GetFromServer(FutureCallback<JsonObject> fcallback, String url_tail) {
         //server_address = "domain address" + url tail
         //For example "http://52.52.31.137" + "API/share_filter.php"
         Ion.with(GlobalVariables.getAppContext())
                 .load("http://52.52.31.137"+url_tail)
-                .asJsonObject()
+                .asJsonObject().setCallback(fcallback);
+                /*
                 .setCallback(new FutureCallback<JsonObject>() {
                     @Override
                     public void onCompleted(Exception e, JsonObject result) {
@@ -91,7 +93,7 @@ public class ServerConnector {
                     }
                 });
         return server_result;
-
+        */
 
 
         /*
