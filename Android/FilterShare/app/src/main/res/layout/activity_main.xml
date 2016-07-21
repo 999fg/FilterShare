@@ -14,6 +14,22 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1">
+
+            <TextView
+                android:id="@+id/tv_title"
+                android:layout_width="153dp"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:layout_marginLeft="40dp"
+                android:layout_marginRight="40dp"
+                android:layout_marginTop="8dp"
+                android:ellipsize="end"
+                android:hint="hint"
+
+                android:singleLine="true"
+                android:textColor="@android:color/white"
+                android:textSize="24sp"
+                android:layout_gravity="center_horizontal|bottom" />
         </FrameLayout>
 
         <team16.filtershare.AutofocusRect
@@ -22,6 +38,10 @@
             android:layout_height="60dp"
             android:clipChildren="false">
         </team16.filtershare.AutofocusRect>
+        <!--android:hint="@string/hint_title"-->
+            <!--android:textColorHint="@color/white_transparency_50"-->
+
+
 
     </FrameLayout>
 

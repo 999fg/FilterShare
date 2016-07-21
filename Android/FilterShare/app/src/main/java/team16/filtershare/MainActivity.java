@@ -20,7 +20,11 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import com.github.amlcurran.showcaseview.ShowcaseView;
+import com.github.amlcurran.showcaseview.targets.ViewTarget;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -178,6 +182,18 @@ public class MainActivity extends Activity {
                 }
         );
 
+        TextView mTVTitle = (TextView) findViewById(R.id.tv_title);
+
+        ShowcaseView mShowcaseView = new ShowcaseView.Builder(this)
+
+                .setTarget(new ViewTarget(mTVTitle))
+                .setContentTitle("Picture Selection")
+                .setContentText("Take your own picture to apply filters. ")
+                //.setStyle(R.style.CustomShowcaseTheme2)
+                .blockAllTouches()
+                //.replaceEndButton(R.layout.showcase_view_cusom_button)
+
+                .build();
 
 
 
@@ -192,6 +208,8 @@ public class MainActivity extends Activity {
 
         if (resultCode == RESULT_OK) {
             if (requestCode == GALLERY_INTENT) {
+
+
                 // Get the filepath and display on imageview.
                 String filepath = getGalleryImagePath(data);
                 // Check if the specified image exists.
@@ -199,9 +217,45 @@ public class MainActivity extends Activity {
                     Toast.makeText(this, "Image does not exist.", Toast.LENGTH_SHORT).show();
                 }
                 else {
-                    GlobalVariables mApp = ((GlobalVariables)getApplicationContext());
-                    Log.d("filepath_gal", filepath);
-                    mApp.set_picture_path(filepath);
+                    try {
+
+                        Bitmap realImage = BitmapFactory.decodeFile(filepath);
+                        Log.d("filepath: ", filepath);
+                        //Log.d("absolute", pictureFile.getAbsolutePath());
+                        //Log.d("tostring", pictureFile.toString());
+
+                        int width = realImage.getWidth();
+                        int height = realImage.getHeight();
+                        Log.d("wh", "w: "+width+" h: "+  height);
+                        Bitmap resizedImage;
+                        if(height>=width)
+                             resizedImage= Bitmap.createBitmap(realImage, 0,height/2-width/2,width, width);
+                        else
+                            resizedImage = Bitmap.createBitmap(realImage, width/2-height/2, 0, width/2+height/2, height);
+                        Log.d("wh after", "w: "+resizedImage.getWidth()+ " h: "+ resizedImage.getHeight());
+                        //Bitmap resizedImage = Bitmap.createScaledBitmap(realImage, 200, 200, true);
+
+                        File pictureFile = getTmpOutputMediaFile(MEDIA_TYPE_IMAGE);
+                        if (pictureFile == null) {
+                            Log.d("PictureCallback", "Error creating media file");
+                            return;
+                        }
+
+                        FileOutputStream fos = new FileOutputStream(pictureFile, false);
+                        resizedImage.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+                        fos.close();
+
+                        GlobalVariables mApp = ((GlobalVariables)getApplicationContext());
+                        mApp.set_picture_path(pictureFile.getAbsolutePath());
+
+
+                    } catch (FileNotFoundException e) {
+                        Log.d("PictureCallback", "File not found: " + e.getMessage());
+                    } catch (IOException e) {
+                        Log.d("PictureCallback", "Error accessing file: " + e.getMessage());
+                    }
+
+
 
                     Intent intent = new Intent(MainActivity.this, PhotoConfirmActivity.class);
                     startActivity(intent);
