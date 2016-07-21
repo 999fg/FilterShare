@@ -1,33 +1,48 @@
 package team16.filtershare;
 
-import android.util.Log;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import com.google.gson.JsonObject;
+import com.koushikdutta.async.future.FutureCallback;
+import com.koushikdutta.ion.Ion;
 
 /**
  * Created by harrykim on 2016. 7. 13..
  */
 public class ServerConnector {
+    //private static JsonObject server_result;
 
-    public static JSONObject uploadToServer(JSONObject jsonobj, String url_tail) throws IOException, JSONException {
+    public static void uploadToServer(JsonObject jsonobj, FutureCallback<JsonObject> fcallback, String url_tail) {
+
+
+        //server_address = "domain address" + url tail
+        //For example "http://52.52.31.137" + "API/share_filter.php"
+        Ion.with(GlobalVariables.getAppContext())
+                .load("http://52.52.31.137"+url_tail)
+                .setJsonObjectBody(jsonobj)
+                .asJsonObject().setCallback(fcallback);
+
+                /*
+                .setCallback(new FutureCallback<JsonObject>() {
+                    @Override
+                    public void onCompleted(Exception e, JsonObject result) {
+                        server_result = result;
+                        Log.d("Post", result.toString());
+
+
+                    }
+                });
+        return server_result;
+                */
+        /*
         //server_address = "domain address" + url tail
         //For example "http://52.52.31.137" + "API/share_filter.php"
         String server_address = "http://52.52.31.137" + url_tail;
         Log.d("address", server_address);
 
 
+
         //String json = "{\"key\":1}";
         String json = jsonobj.toString();
+
 
         URL url = new URL(server_address);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -57,9 +72,31 @@ public class ServerConnector {
         conn.disconnect();
 
         return result;
+        */
     }
 
-    public static JSONObject GetFromServer(String url_tail) throws IOException, JSONException {
+
+    public static void GetFromServer(FutureCallback<JsonObject> fcallback, String url_tail) {
+        //server_address = "domain address" + url tail
+        //For example "http://52.52.31.137" + "API/share_filter.php"
+        Ion.with(GlobalVariables.getAppContext())
+                .load("http://52.52.31.137"+url_tail)
+                .asJsonObject().setCallback(fcallback);
+                /*
+                .setCallback(new FutureCallback<JsonObject>() {
+                    @Override
+                    public void onCompleted(Exception e, JsonObject result) {
+                        server_result = result;
+                        Log.d("Get", result.toString());
+
+
+                    }
+                });
+        return server_result;
+        */
+
+
+        /*
         //server_address = "domain address" + url tail
         //For example "http://52.52.31.137" + "API/share_filter.php"
         String server_address = "http://52.52.31.137" + url_tail;
@@ -90,5 +127,6 @@ public class ServerConnector {
         conn.disconnect();
 
         return result;
+        */
     }
 }
