@@ -17,6 +17,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -71,21 +72,21 @@ public class FilterMakingActivity extends AppCompatActivity implements GLSurface
         mCurrentEffect = R.id.none;
 
         // Initialize buttons for 8 filter effects
-        Button brightness_button = (Button) findViewById(R.id.brightness_button);
+        ImageButton brightness_button = (ImageButton) findViewById(R.id.brightness_button);
         brightness_button.setOnClickListener(this);
-        Button contrast_button = (Button) findViewById(R.id.contrast_button);
+        ImageButton contrast_button = (ImageButton) findViewById(R.id.contrast_button);
         contrast_button.setOnClickListener(this);
-        Button saturation_button = (Button) findViewById(R.id.saturation_button);
+        ImageButton saturation_button = (ImageButton) findViewById(R.id.saturation_button);
         saturation_button.setOnClickListener(this);
-        Button sharpen_button = (Button) findViewById(R.id.sharpen_button);
+        ImageButton sharpen_button = (ImageButton) findViewById(R.id.sharpen_button);
         sharpen_button.setOnClickListener(this);
-        Button temperature_button = (Button) findViewById(R.id.temperature_button);
+        ImageButton temperature_button = (ImageButton) findViewById(R.id.temperature_button);
         temperature_button.setOnClickListener(this);
-        Button tint_button = (Button) findViewById(R.id.tint_button);
+        ImageButton tint_button = (ImageButton) findViewById(R.id.tint_button);
         tint_button.setOnClickListener(this);
-        Button vignette_button = (Button) findViewById(R.id.vignette_button);
+        ImageButton vignette_button = (ImageButton) findViewById(R.id.vignette_button);
         vignette_button.setOnClickListener(this);
-        Button grain_button = (Button) findViewById(R.id.grain_button);
+        ImageButton grain_button = (ImageButton) findViewById(R.id.grain_button);
         grain_button.setOnClickListener(this);
 
 
@@ -272,7 +273,6 @@ public class FilterMakingActivity extends AppCompatActivity implements GLSurface
             default:
                 break;
         }
-
     }
     private void applyEffect() {
         if (mEffectCount > 0) {
@@ -357,6 +357,12 @@ public class FilterMakingActivity extends AppCompatActivity implements GLSurface
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean b) {
+                progress = seekBar.getProgress();
+                Log.d("progress", Integer.toString(progress));
+                mEffectView.requestRender();
+
+                TextView seekBarValue = (TextView) findViewById(R.id.seek_bar_value);
+                seekBarValue.setText(Integer.toString(progress));
             }
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
@@ -383,21 +389,21 @@ public class FilterMakingActivity extends AppCompatActivity implements GLSurface
         //Inflate the slider view
         bottomBar = getLayoutInflater().inflate(R.layout.activity_select_effect, parent, false);
         parent.addView(bottomBar, index);
-        Button brightness_button = (Button) findViewById(R.id.brightness_button);
+        ImageButton brightness_button = (ImageButton) findViewById(R.id.brightness_button);
         brightness_button.setOnClickListener(this);
-        Button contrast_button = (Button) findViewById(R.id.contrast_button);
+        ImageButton contrast_button = (ImageButton) findViewById(R.id.contrast_button);
         contrast_button.setOnClickListener(this);
-        Button saturation_button = (Button) findViewById(R.id.saturation_button);
+        ImageButton saturation_button = (ImageButton) findViewById(R.id.saturation_button);
         saturation_button.setOnClickListener(this);
-        Button sharpen_button = (Button) findViewById(R.id.sharpen_button);
+        ImageButton sharpen_button = (ImageButton) findViewById(R.id.sharpen_button);
         sharpen_button.setOnClickListener(this);
-        Button temperature_button = (Button) findViewById(R.id.temperature_button);
+        ImageButton temperature_button = (ImageButton) findViewById(R.id.temperature_button);
         temperature_button.setOnClickListener(this);
-        Button tint_button = (Button) findViewById(R.id.tint_button);
+        ImageButton tint_button = (ImageButton) findViewById(R.id.tint_button);
         tint_button.setOnClickListener(this);
-        Button vignette_button = (Button) findViewById(R.id.vignette_button);
+        ImageButton vignette_button = (ImageButton) findViewById(R.id.vignette_button);
         vignette_button.setOnClickListener(this);
-        Button grain_button = (Button) findViewById(R.id.grain_button);
+        ImageButton grain_button = (ImageButton) findViewById(R.id.grain_button);
         grain_button.setOnClickListener(this);
 
         final Button change_image_button = (Button) findViewById(R.id.change_image_button);

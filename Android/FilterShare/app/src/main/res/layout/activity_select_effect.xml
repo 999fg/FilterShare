@@ -2,62 +2,79 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:gravity="center_horizontal"
     android:orientation="vertical"
-    android:id="@+id/select_effect_layout">
+    android:id="@+id/select_effect_layout"
+    android:layout_alignParentBottom="true">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:weightSum="8">
-        <Button
+        <ImageButton
             android:id="@+id/brightness_button"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:text="BR"
-            android:layout_weight="1"/>
-        <Button
+            android:layout_weight="1"
+            android:src="@drawable/brightness"
+            android:scaleType="fitCenter"
+            style="?android:attr/borderlessButtonStyle" />
+        <ImageButton
             android:id="@+id/contrast_button"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:text="CT"
-            android:layout_weight="1"/>
-        <Button
+            android:layout_weight="1"
+            android:src="@drawable/contrast"
+            android:scaleType="fitCenter"
+            style="?android:attr/borderlessButtonStyle" />
+        <ImageButton
             android:id="@+id/saturation_button"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:text="ST"
-            android:layout_weight="1"/>
-        <Button
+            android:layout_weight="1"
+            android:src="@drawable/saturation"
+            android:scaleType="fitCenter"
+            style="?android:attr/borderlessButtonStyle"/>
+        <ImageButton
             android:id="@+id/sharpen_button"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:text="SH"
-            android:layout_weight="1"/>
-        <Button
+            android:layout_weight="1"
+            android:src="@drawable/sharpen"
+            android:scaleType="fitCenter"
+            style="?android:attr/borderlessButtonStyle"/>
+        <ImageButton
             android:id="@+id/temperature_button"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:text="TM"
-            android:layout_weight="1"/>
-        <Button
+            android:layout_weight="1"
+            android:src="@drawable/temperature"
+            android:scaleType="fitCenter"
+            style="?android:attr/borderlessButtonStyle"/>
+        <ImageButton
             android:id="@+id/tint_button"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:text="TN"
-            android:layout_weight="1"/>
-        <Button
+            android:layout_weight="1"
+            android:src="@drawable/tint"
+            android:scaleType="fitCenter"
+            style="?android:attr/borderlessButtonStyle"/>
+        <ImageButton
             android:id="@+id/vignette_button"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:text="VG"
-            android:layout_weight="1"/>
-        <Button
+            android:layout_weight="1"
+            android:src="@drawable/vignette"
+            android:scaleType="fitCenter"
+            style="?android:attr/borderlessButtonStyle"/>
+        <ImageButton
             android:id="@+id/grain_button"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:text="GR"
-            android:layout_weight="1"/>
+            android:layout_weight="1"
+            android:src="@drawable/grain"
+            android:scaleType="fitCenter"
+            style="?android:attr/borderlessButtonStyle"/>
     </LinearLayout>
     <LinearLayout
         android:layout_width="wrap_content"
