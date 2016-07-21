@@ -87,9 +87,16 @@ public class MainActivity extends Activity {
                 Uri.fromFile(pictureFile).getPath();
                 Log.d("Uri", Uri.fromFile(pictureFile).getPath());
                 realImage=rotate_image(Uri.fromFile(pictureFile).getPath(),realImage);
-                //realImage= rotate(realImage, 270);
 
-                realImage.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+                int width = realImage.getWidth();
+                int height = realImage.getHeight();
+                Log.d("wh", "w: "+width+" h: "+  height);
+                Bitmap resizedImage = Bitmap.createBitmap(realImage, 0,height/2-width/2,width, width);
+                Log.d("wh after", "w: "+resizedImage.getWidth()+ " h: "+ resizedImage.getHeight());
+                //Bitmap resizedImage = Bitmap.createScaledBitmap(realImage, 200, 200, true);
+
+
+                resizedImage.compress(Bitmap.CompressFormat.JPEG, 100, fos);
                 fos.close();
 
 
