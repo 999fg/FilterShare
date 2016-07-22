@@ -78,7 +78,7 @@ public class FilterMakingActivity extends AppCompatActivity implements GLSurface
         sharpen_button.setOnClickListener(this);
         ImageButton temperature_button = (ImageButton) findViewById(R.id.temperature_button);
         temperature_button.setOnClickListener(this);
-        ImageButton tint_button = (ImageButton) findViewById(R.id.tint_button);
+        ImageButton tint_button = (ImageButton) findViewById(R.id.fade_button);
         tint_button.setOnClickListener(this);
         ImageButton vignette_button = (ImageButton) findViewById(R.id.vignette_button);
         vignette_button.setOnClickListener(this);
@@ -400,7 +400,7 @@ public class FilterMakingActivity extends AppCompatActivity implements GLSurface
         sharpen_button.setOnClickListener(this);
         ImageButton temperature_button = (ImageButton) findViewById(R.id.temperature_button);
         temperature_button.setOnClickListener(this);
-        ImageButton tint_button = (ImageButton) findViewById(R.id.tint_button);
+        ImageButton tint_button = (ImageButton) findViewById(R.id.fade_button);
         tint_button.setOnClickListener(this);
         ImageButton vignette_button = (ImageButton) findViewById(R.id.vignette_button);
         vignette_button.setOnClickListener(this);
