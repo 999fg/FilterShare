@@ -63,7 +63,7 @@
                 android:id="@+id/tags"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Hashtags and Description"/>
+                android:hint="Hashtags"/>
 
         </android.support.design.widget.TextInputLayout>
 

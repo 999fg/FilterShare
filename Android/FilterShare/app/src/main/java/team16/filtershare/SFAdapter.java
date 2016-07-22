@@ -2,6 +2,7 @@ package team16.filtershare;
 
 import android.graphics.Bitmap;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -56,11 +57,11 @@ public class SFAdapter extends RecyclerView.Adapter<SFAdapter.ViewHolder> {
         holder.imageView.setImageBitmap(sfDataset.get(position).imgbit);
         holder.filterTitle.setText(sfDataset.get(position).title);
         if (filter_likes > 999999)
-            holder.filterLikes.setText(Double.parseDouble(String.format("%.2f",(double) filter_likes / 1000000)) + "M likes");
+            holder.filterLikes.setText(Double.parseDouble(String.format("%.2f",(double) filter_likes / 1000000)) + "M times used");
         else if (filter_likes > 999)
-            holder.filterLikes.setText(Double.parseDouble(String.format("%.2f",(double) filter_likes / 1000)) + "k likes");
+            holder.filterLikes.setText(Double.parseDouble(String.format("%.2f",(double) filter_likes / 1000)) + "k times used");
         else
-            holder.filterLikes.setText(filter_likes + " likes");
+            holder.filterLikes.setText(filter_likes + " times used");
         for(int i = 0; i < hashtags.length; i++)
             filter_hashtags += "#"+hashtags[i]+" ";
         holder.filterHashtags.setText(filter_hashtags);

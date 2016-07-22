@@ -1,5 +1,6 @@
 package team16.filtershare;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -16,6 +17,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.Display;
 import android.view.MotionEvent;
@@ -61,75 +65,23 @@ public class MainActivity extends Activity {
     private static int current_camera = -1;
 
 
-
-    private Camera.PictureCallback mPicture = new Camera.PictureCallback() {
-
-        @Override
-        public void onPictureTaken(byte[] data, Camera camera) {
-
-            File pictureFile = getTmpOutputMediaFile(MEDIA_TYPE_IMAGE);
-            if (pictureFile == null) {
-                Log.d("PictureCallback", "Error creating media file");
-                return;
-            }
-
-            try {
-                FileOutputStream fos = new FileOutputStream(pictureFile, false);
-                //fos.write(data);
-                //fos.close();
-
-                fos = new FileOutputStream(pictureFile, false);
-
-                Bitmap realImage = BitmapFactory.decodeByteArray(data, 0, data.length);
-                //Log.d("absolute", pictureFile.getAbsolutePath());
-                //Log.d("tostring", pictureFile.toString());
-                if(cameraId==back_camera) {
-                    Log.d("save", "back");
-                    realImage = rotate(realImage, 90, false);
-                }
-                else {
-                    Log.d("save", "front");
-                    realImage = rotate(realImage, 90, true);
-                }
-                Uri.fromFile(pictureFile).getPath();
-                Log.d("Uri", Uri.fromFile(pictureFile).getPath());
-                realImage=rotate_image(Uri.fromFile(pictureFile).getPath(),realImage);
-
-                int width = realImage.getWidth();
-                int height = realImage.getHeight();
-                Log.d("wh", "w: "+width+" h: "+  height);
-                Bitmap resizedImage = Bitmap.createBitmap(realImage, 0,height/2-width/2,width, width);
-                Log.d("wh after", "w: "+resizedImage.getWidth()+ " h: "+ resizedImage.getHeight());
-                //Bitmap resizedImage = Bitmap.createScaledBitmap(realImage, 200, 200, true);
-
-
-                resizedImage.compress(Bitmap.CompressFormat.JPEG, 100, fos);
-                fos.close();
-
-
-
-            } catch (FileNotFoundException e) {
-                Log.d("PictureCallback", "File not found: " + e.getMessage());
-            } catch (IOException e) {
-                Log.d("PictureCallback", "Error accessing file: " + e.getMessage());
-            }
-
-            GlobalVariables mApp = ((GlobalVariables)getApplicationContext());
-            mApp.set_picture_path(pictureFile.getAbsolutePath());
-
-            Intent intent = new Intent(MainActivity.this, PhotoConfirmActivity.class);
-            startActivity(intent);
-
-            //finish();
-
-        }
-    };
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // check Android 6 permission
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+                == PackageManager.PERMISSION_GRANTED) {
+            //pass
+            Log.d("permission", "pass permission");
+        } else {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.CAMERA},
+                    0);
+        }
+
 
         // Create an instance of Camera
         if(checkCameraHardware(this)) {
@@ -176,8 +128,8 @@ public class MainActivity extends Activity {
 
 
                         // Create our Preview view and set it as the content of our activity.
-                        mPreview = new CameraPreview(MainActivity.this, mCamera);
-                        preview.addView(mPreview);
+                        //mPreview = new CameraPreview(MainActivity.this, mCamera);
+                        //preview.addView(mPreview);
 
 
 
@@ -406,19 +358,28 @@ public class MainActivity extends Activity {
 
         if(checkCameraHardware(this)) {
             Log.d("Ok", "It has camera");
-            mCamera = getCameraInstance();
-            if (mCamera==null)
-                Log.e("Fail", "no Camera Instance");
+            if(mCamera==null) {
+                mCamera = getCameraInstance();
+                if (mCamera == null) {
+                    Log.e("Fail", "no Camera Instance");
+                    return;
+                }
+                mPreview = new CameraPreview(this, mCamera);
+                FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
+                preview.addView(mPreview);
+            }
+
+
+
         }
         else
             Log.e("NO", "checkCameraHardware failed");
 
         // Create our Preview view and set it as the content of our activity.
-        mPreview = new CameraPreview(this, mCamera);
-        FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
-        preview.addView(mPreview);
+
 
     }
+
 
 
     /**
@@ -594,7 +555,9 @@ public class MainActivity extends Activity {
             mCamera.setParameters(params);
         }
         // Create our Preview view and set it as the content of our activity.
+        Log.d("preview", "start camera preview");
         mPreview = new CameraPreview(this, mCamera);
+        Log.d("preview", "did camera preview");
         final FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
         preview.addView(mPreview);
 
@@ -735,5 +698,85 @@ public class MainActivity extends Activity {
                     }
                 }
         );
+    }
+
+    private Camera.PictureCallback mPicture = new Camera.PictureCallback() {
+
+        @Override
+        public void onPictureTaken(byte[] data, Camera camera) {
+
+            File pictureFile = getTmpOutputMediaFile(MEDIA_TYPE_IMAGE);
+            if (pictureFile == null) {
+                Log.d("PictureCallback", "Error creating media file");
+                return;
+            }
+
+            try {
+                FileOutputStream fos = new FileOutputStream(pictureFile, false);
+                //fos.write(data);
+                //fos.close();
+
+                fos = new FileOutputStream(pictureFile, false);
+
+                Bitmap realImage = BitmapFactory.decodeByteArray(data, 0, data.length);
+                //Log.d("absolute", pictureFile.getAbsolutePath());
+                //Log.d("tostring", pictureFile.toString());
+                if(cameraId==back_camera) {
+                    Log.d("save", "back");
+                    realImage = rotate(realImage, 90, false);
+                }
+                else {
+                    Log.d("save", "front");
+                    realImage = rotate(realImage, 90, true);
+                }
+                Uri.fromFile(pictureFile).getPath();
+                Log.d("Uri", Uri.fromFile(pictureFile).getPath());
+                realImage=rotate_image(Uri.fromFile(pictureFile).getPath(),realImage);
+
+                int width = realImage.getWidth();
+                int height = realImage.getHeight();
+                Log.d("wh", "w: "+width+" h: "+  height);
+                Bitmap resizedImage = Bitmap.createBitmap(realImage, 0,height/2-width/2,width, width);
+                Log.d("wh after", "w: "+resizedImage.getWidth()+ " h: "+ resizedImage.getHeight());
+                //Bitmap resizedImage = Bitmap.createScaledBitmap(realImage, 200, 200, true);
+
+
+                resizedImage.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+                fos.close();
+
+
+
+            } catch (FileNotFoundException e) {
+                Log.d("PictureCallback", "File not found: " + e.getMessage());
+            } catch (IOException e) {
+                Log.d("PictureCallback", "Error accessing file: " + e.getMessage());
+            }
+
+            GlobalVariables mApp = ((GlobalVariables)getApplicationContext());
+            mApp.set_picture_path(pictureFile.getAbsolutePath());
+
+            Intent intent = new Intent(MainActivity.this, PhotoConfirmActivity.class);
+            startActivity(intent);
+
+            //finish();
+
+        }
+    };
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[],
+                                           @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case 0: {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // permission was granted
+                } else {
+                    setResult(Activity.RESULT_CANCELED);
+                    finish();
+                }
+            }
+        }
     }
 }

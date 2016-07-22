@@ -28,4 +28,6 @@ dependencies {
     compile 'com.android.support:recyclerview-v7:23.1.+'
     compile 'com.koushikdutta.ion:ion:2.+'
     compile 'com.github.amlcurran.showcaseview:library:5.4.3'
+    compile 'com.squareup.okhttp3:okhttp:3.4.1'
+    compile 'org.ocpsoft.prettytime:prettytime:3.2.7.Final'
 }
