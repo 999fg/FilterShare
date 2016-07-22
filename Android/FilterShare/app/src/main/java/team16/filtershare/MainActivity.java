@@ -8,6 +8,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.Camera;
 import android.media.ExifInterface;
@@ -16,13 +17,15 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
-import android.widget.TextView;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import com.github.amlcurran.showcaseview.OnShowcaseEventListener;
 import com.github.amlcurran.showcaseview.ShowcaseView;
 import com.github.amlcurran.showcaseview.targets.ViewTarget;
 
@@ -182,18 +185,89 @@ public class MainActivity extends Activity {
                 }
         );
 
-        TextView mTVTitle = (TextView) findViewById(R.id.tv_title);
 
-        ShowcaseView mShowcaseView = new ShowcaseView.Builder(this)
+        ImageButton mCapture = (ImageButton) findViewById(R.id.button_capture);
 
-                .setTarget(new ViewTarget(mTVTitle))
-                .setContentTitle("Picture Selection")
-                .setContentText("Take your own picture to apply filters. ")
+        ShowcaseView mShowcaseView1 = new ShowcaseView.Builder(this)
+
+                .setTarget(new ViewTarget(mCapture))
+                .setContentTitle("Select a picture by taking a photo")
+                .setContentText("Take your own photo to apply FilterShare filters. ")
                 //.setStyle(R.style.CustomShowcaseTheme2)
                 .blockAllTouches()
-                //.replaceEndButton(R.layout.showcase_view_cusom_button)
+                .replaceEndButton(R.layout.scv_button)
 
                 .build();
+
+        final RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+        layoutParams.addRule(RelativeLayout.CENTER_HORIZONTAL);
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        layoutParams.setMargins(0, size.y *3/10, 0, 0);
+
+        mShowcaseView1.setButtonPosition(layoutParams);
+        //mShowcaseView1.forceTextPosition(ShowcaseView.LEFT_OF_SHOWCASE);
+
+        mShowcaseView1.setOnShowcaseEventListener(new OnShowcaseEventListener() {
+            @Override
+            public void onShowcaseViewHide(ShowcaseView showcaseView) {
+                ImageButton mButton_gallery = (ImageButton) findViewById(R.id.button_gallery);
+
+                ShowcaseView mShowcaseView2 = new ShowcaseView.Builder(MainActivity.this)
+
+                        .setTarget(new ViewTarget(mButton_gallery))
+                        .setContentTitle("Select a picture by picking up from gallery")
+                        .setContentText("Pick up the existing picture from gallery to apply FilterShare filters.")
+                        //.setStyle(R.style.CustomShowcaseTheme2)
+                        .blockAllTouches()
+
+                        .replaceEndButton(R.layout.scv_button)
+
+                        .build();
+                mShowcaseView2.setButtonPosition(layoutParams);
+
+
+            }
+            @Override
+            public void onShowcaseViewDidHide(ShowcaseView showcaseView) {
+
+            }
+
+            @Override
+            public void onShowcaseViewShow(ShowcaseView showcaseView) {
+
+            }
+
+            @Override
+            public void onShowcaseViewTouchBlocked(MotionEvent motionEvent) {
+
+            };
+
+
+            OnShowcaseEventListener NONE = new OnShowcaseEventListener() {
+                @Override
+                public void onShowcaseViewHide(ShowcaseView showcaseView) {
+
+                }
+
+                @Override
+                public void onShowcaseViewDidHide(ShowcaseView showcaseView) {
+
+                }
+
+                @Override
+                public void onShowcaseViewShow(ShowcaseView showcaseView) {
+
+                }
+
+                @Override
+                public void onShowcaseViewTouchBlocked(MotionEvent motionEvent) {
+
+                }
+            };
+
+        });
 
 
 
