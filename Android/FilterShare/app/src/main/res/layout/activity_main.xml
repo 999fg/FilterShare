@@ -23,6 +23,8 @@
             android:clipChildren="false">
         </team16.filtershare.AutofocusRect>
 
+
+
     </FrameLayout>
 
     <RelativeLayout

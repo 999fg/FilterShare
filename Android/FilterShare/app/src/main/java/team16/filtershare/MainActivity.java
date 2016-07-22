@@ -8,6 +8,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.Camera;
 import android.media.ExifInterface;
@@ -16,11 +17,17 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
+
+import com.github.amlcurran.showcaseview.OnShowcaseEventListener;
+import com.github.amlcurran.showcaseview.ShowcaseView;
+import com.github.amlcurran.showcaseview.targets.ViewTarget;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -179,6 +186,89 @@ public class MainActivity extends Activity {
         );
 
 
+        ImageButton mCapture = (ImageButton) findViewById(R.id.button_capture);
+
+        ShowcaseView mShowcaseView1 = new ShowcaseView.Builder(this)
+
+                .setTarget(new ViewTarget(mCapture))
+                .setContentTitle("Select a picture by taking a photo")
+                .setContentText("Take your own photo to apply FilterShare filters. ")
+                //.setStyle(R.style.CustomShowcaseTheme2)
+                .blockAllTouches()
+                .replaceEndButton(R.layout.scv_button)
+
+                .build();
+
+        final RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+        layoutParams.addRule(RelativeLayout.CENTER_HORIZONTAL);
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        layoutParams.setMargins(0, size.y *3/10, 0, 0);
+
+        mShowcaseView1.setButtonPosition(layoutParams);
+        //mShowcaseView1.forceTextPosition(ShowcaseView.LEFT_OF_SHOWCASE);
+
+        mShowcaseView1.setOnShowcaseEventListener(new OnShowcaseEventListener() {
+            @Override
+            public void onShowcaseViewHide(ShowcaseView showcaseView) {
+                ImageButton mButton_gallery = (ImageButton) findViewById(R.id.button_gallery);
+
+                ShowcaseView mShowcaseView2 = new ShowcaseView.Builder(MainActivity.this)
+
+                        .setTarget(new ViewTarget(mButton_gallery))
+                        .setContentTitle("Select a picture by picking up from gallery")
+                        .setContentText("Pick up the existing picture from gallery to apply FilterShare filters.")
+                        //.setStyle(R.style.CustomShowcaseTheme2)
+                        .blockAllTouches()
+
+                        .replaceEndButton(R.layout.scv_button)
+
+                        .build();
+                mShowcaseView2.setButtonPosition(layoutParams);
+
+
+            }
+            @Override
+            public void onShowcaseViewDidHide(ShowcaseView showcaseView) {
+
+            }
+
+            @Override
+            public void onShowcaseViewShow(ShowcaseView showcaseView) {
+
+            }
+
+            @Override
+            public void onShowcaseViewTouchBlocked(MotionEvent motionEvent) {
+
+            };
+
+
+            OnShowcaseEventListener NONE = new OnShowcaseEventListener() {
+                @Override
+                public void onShowcaseViewHide(ShowcaseView showcaseView) {
+
+                }
+
+                @Override
+                public void onShowcaseViewDidHide(ShowcaseView showcaseView) {
+
+                }
+
+                @Override
+                public void onShowcaseViewShow(ShowcaseView showcaseView) {
+
+                }
+
+                @Override
+                public void onShowcaseViewTouchBlocked(MotionEvent motionEvent) {
+
+                }
+            };
+
+        });
+
 
 
     }
@@ -192,6 +282,8 @@ public class MainActivity extends Activity {
 
         if (resultCode == RESULT_OK) {
             if (requestCode == GALLERY_INTENT) {
+
+
                 // Get the filepath and display on imageview.
                 String filepath = getGalleryImagePath(data);
                 // Check if the specified image exists.
@@ -199,9 +291,45 @@ public class MainActivity extends Activity {
                     Toast.makeText(this, "Image does not exist.", Toast.LENGTH_SHORT).show();
                 }
                 else {
-                    GlobalVariables mApp = ((GlobalVariables)getApplicationContext());
-                    Log.d("filepath_gal", filepath);
-                    mApp.set_picture_path(filepath);
+                    try {
+
+                        Bitmap realImage = BitmapFactory.decodeFile(filepath);
+                        Log.d("filepath: ", filepath);
+                        //Log.d("absolute", pictureFile.getAbsolutePath());
+                        //Log.d("tostring", pictureFile.toString());
+
+                        int width = realImage.getWidth();
+                        int height = realImage.getHeight();
+                        Log.d("wh", "w: "+width+" h: "+  height);
+                        Bitmap resizedImage;
+                        if(height>=width)
+                             resizedImage= Bitmap.createBitmap(realImage, 0,height/2-width/2,width, width);
+                        else
+                            resizedImage = Bitmap.createBitmap(realImage, width/2-height/2, 0, width/2+height/2, height);
+                        Log.d("wh after", "w: "+resizedImage.getWidth()+ " h: "+ resizedImage.getHeight());
+                        //Bitmap resizedImage = Bitmap.createScaledBitmap(realImage, 200, 200, true);
+
+                        File pictureFile = getTmpOutputMediaFile(MEDIA_TYPE_IMAGE);
+                        if (pictureFile == null) {
+                            Log.d("PictureCallback", "Error creating media file");
+                            return;
+                        }
+
+                        FileOutputStream fos = new FileOutputStream(pictureFile, false);
+                        resizedImage.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+                        fos.close();
+
+                        GlobalVariables mApp = ((GlobalVariables)getApplicationContext());
+                        mApp.set_picture_path(pictureFile.getAbsolutePath());
+
+
+                    } catch (FileNotFoundException e) {
+                        Log.d("PictureCallback", "File not found: " + e.getMessage());
+                    } catch (IOException e) {
+                        Log.d("PictureCallback", "Error accessing file: " + e.getMessage());
+                    }
+
+
 
                     Intent intent = new Intent(MainActivity.this, PhotoConfirmActivity.class);
                     startActivity(intent);
