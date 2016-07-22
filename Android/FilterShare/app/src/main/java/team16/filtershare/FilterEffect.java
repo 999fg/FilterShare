@@ -14,8 +14,8 @@ public enum FilterEffect {
     GRAIN ("grain", 0);
 
     private String name;
-    private double value;
-    FilterEffect(String name, double value) {
+    private int value;
+    FilterEffect(String name, int value) {
         this.name = name;
         this.value = value;
     }
@@ -23,13 +23,13 @@ public enum FilterEffect {
     public String getName() {
         return name;
     }
-    public double getValue() {
+    public int getValue() {
         return value;
     }
     public void setName (String name) {
         this.name = name;
     }
-    public void setValue (double value) {
+    public void setValue (int value) {
         this.value = value;
     }
 }

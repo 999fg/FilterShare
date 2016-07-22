@@ -31,12 +31,10 @@ public class FilterMakingActivity extends AppCompatActivity implements GLSurface
     private GLSurfaceView mEffectView;
     private int[] mTextures = new int[3];
     private EffectContext mEffectContext;
-    private Effect mEffect;
     private TextureRenderer mTexRenderer = new TextureRenderer();
     private int mImageWidth;
     private int mImageHeight;
     private boolean mInitialized = false;
-    int mCurrentEffect;
 
     private int progress = 0;
     private int origProgress = 0;
@@ -46,62 +44,19 @@ public class FilterMakingActivity extends AppCompatActivity implements GLSurface
     private int mEffectCount = 0;
     private int firstEffect = 0;
 
-    public void setCurrentEffect(int effect) {
-        mCurrentEffect = effect;
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_make_filter);
 
-        LinearLayout bottomBar = (LinearLayout) findViewById(R.id.bottom_bar);
-        //Inflate the slider view
-        View selectEffectView = getLayoutInflater().inflate(R.layout.activity_select_effect, bottomBar, false);
-        bottomBar.addView(selectEffectView);
-
         /* Initial settings for image preview (GLSurfaceView) */
         mEffectView = (GLSurfaceView) findViewById(R.id.imgPreview);
         mEffectView.setEGLContextClientVersion(2);
         mEffectView.setRenderer(this);
         mEffectView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
-        mCurrentEffect = R.id.none;
 
-        // Initialize buttons for 8 filter effects
-        ImageButton brightness_button = (ImageButton) findViewById(R.id.brightness_button);
-        brightness_button.setOnClickListener(this);
-        ImageButton contrast_button = (ImageButton) findViewById(R.id.contrast_button);
-        contrast_button.setOnClickListener(this);
-        ImageButton saturation_button = (ImageButton) findViewById(R.id.saturation_button);
-        saturation_button.setOnClickListener(this);
-        ImageButton sharpen_button = (ImageButton) findViewById(R.id.sharpen_button);
-        sharpen_button.setOnClickListener(this);
-        ImageButton temperature_button = (ImageButton) findViewById(R.id.temperature_button);
-        temperature_button.setOnClickListener(this);
-        ImageButton tint_button = (ImageButton) findViewById(R.id.tint_button);
-        tint_button.setOnClickListener(this);
-        ImageButton vignette_button = (ImageButton) findViewById(R.id.vignette_button);
-        vignette_button.setOnClickListener(this);
-        ImageButton grain_button = (ImageButton) findViewById(R.id.grain_button);
-        grain_button.setOnClickListener(this);
-
-
-        final Button change_image_button = (Button) findViewById(R.id.change_image_button);
-        change_image_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(FilterMakingActivity.this, PhotoConfirmActivity.class);
-                startActivity(intent);
-            }
-        });
-        final Button next_button = (Button) findViewById(R.id.next_button);
-        next_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(FilterMakingActivity.this, FilterMakingConfirmActivity.class);
-                startActivity(intent);
-            }
-        });
+        inflateEffects();
     }
 
     public void onClick(View v) {
@@ -139,29 +94,28 @@ public class FilterMakingActivity extends AppCompatActivity implements GLSurface
                 inflateSlider();
                 break;
             case R.id.cancel_button:
-                Log.d("Seek bar layout", "CANCEL button");
                 inflateEffects();
                 progress = origProgress;
-                Log.d("CANCEL orig progress", Integer.toString(progress));
                 mEffectView.requestRender();
                 break;
             case R.id.done_button:
-                Log.d("Seek bar layout", "DONE button");
                 SeekBar seekBar = (SeekBar) findViewById(R.id.seek_bar);
                 currentEffect.setValue(seekBar.getProgress());
                 inflateEffects();
                 break;
         }
     }
+
     private void loadTextures() {
         // Generate textures
         GLES20.glGenTextures(3, mTextures, 0);
 
+        // Load selected image into bitmap
         GlobalVariables sfApp = ((GlobalVariables)getApplicationContext());
         String picturepath = sfApp.get_picture_path();
         Bitmap bitmap = BitmapFactory.decodeFile(picturepath);
-        // Load input bitmap
 
+        // Store bitmap info and update texture size
         mImageWidth = bitmap.getWidth();
         mImageHeight = bitmap.getHeight();
         mTexRenderer.updateTextureSize(mImageWidth, mImageHeight);
@@ -176,10 +130,6 @@ public class FilterMakingActivity extends AppCompatActivity implements GLSurface
 
     private void initEffect(int progress) {
         EffectFactory effectFactory = mEffectContext.getFactory();
-        /*
-        if (mEffect != null) {
-            mEffect.release();
-        }*/
 
         switch (currentEffect) {
             case BRIGHTNESS:
@@ -272,6 +222,7 @@ public class FilterMakingActivity extends AppCompatActivity implements GLSurface
                 break;
         }
     }
+
     private void applyEffect() {
         if (mEffectCount > 0) {
             mEffectArray[firstEffect].apply(mTextures[0], mImageWidth, mImageHeight, mTextures[1]);
@@ -306,7 +257,6 @@ public class FilterMakingActivity extends AppCompatActivity implements GLSurface
             loadTextures();
             mInitialized = true;
         }
-        //if (mCurrentEffect != R.id.none) {
         if (currentEffect != null) {
             Log.d("IN", "HERE");
             //if an effect is chosen initialize it and apply it to the texture
@@ -329,7 +279,6 @@ public class FilterMakingActivity extends AppCompatActivity implements GLSurface
 
     private void inflateSlider() {
         //Check if seek bar layout already exists i.e. if it's slider mode
-        LinearLayout seekBarLayout = (LinearLayout) findViewById(R.id.seek_bar_layout);
         Log.d("Inflate slider", "IN");
         // Remove existing select effect view
         View bottomBar = findViewById(R.id.select_effect_layout);
@@ -382,14 +331,18 @@ public class FilterMakingActivity extends AppCompatActivity implements GLSurface
     }
 
     private void inflateEffects() {
+        // Find the parent container for bottom bar
+        LinearLayout parent = (LinearLayout) findViewById(R.id.bottom_bar);
+
+        // Remove seek_bar_layout view if exists
         View bottomBar = findViewById(R.id.seek_bar_layout);
-        ViewGroup parent = (ViewGroup)bottomBar.getParent();
         int index = parent.indexOfChild(bottomBar);
         parent.removeView(bottomBar);
 
         //Inflate the slider view
         bottomBar = getLayoutInflater().inflate(R.layout.activity_select_effect, parent, false);
         parent.addView(bottomBar, index);
+
         ImageButton brightness_button = (ImageButton) findViewById(R.id.brightness_button);
         brightness_button.setOnClickListener(this);
         ImageButton contrast_button = (ImageButton) findViewById(R.id.contrast_button);
@@ -400,8 +353,8 @@ public class FilterMakingActivity extends AppCompatActivity implements GLSurface
         sharpen_button.setOnClickListener(this);
         ImageButton temperature_button = (ImageButton) findViewById(R.id.temperature_button);
         temperature_button.setOnClickListener(this);
-        ImageButton tint_button = (ImageButton) findViewById(R.id.tint_button);
-        tint_button.setOnClickListener(this);
+        ImageButton fade_button = (ImageButton) findViewById(R.id.fade_button);
+        fade_button.setOnClickListener(this);
         ImageButton vignette_button = (ImageButton) findViewById(R.id.vignette_button);
         vignette_button.setOnClickListener(this);
         ImageButton grain_button = (ImageButton) findViewById(R.id.grain_button);
