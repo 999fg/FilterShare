@@ -52,7 +52,7 @@
             android:scaleType="fitCenter"
             style="?android:attr/borderlessButtonStyle"/>
         <ImageButton
-            android:id="@+id/tint_button"
+            android:id="@+id/fade_button"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_weight="1"
@@ -77,20 +77,25 @@
             style="?android:attr/borderlessButtonStyle"/>
     </LinearLayout>
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:weightSum="2"
         android:orientation="horizontal">
         <Button
             android:id="@+id/change_image_button"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:text="Change Image"
-            android:theme="@style/MyButton"/>
+            android:theme="@style/MyButton"
+            style="?android:attr/borderlessButtonStyle" />
         <Button
             android:id="@+id/next_button"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:text="Next"
-            android:theme="@style/MyButton"/>
+            android:theme="@style/MyButton"
+            style="?android:attr/borderlessButtonStyle" />
     </LinearLayout>
 </LinearLayout>

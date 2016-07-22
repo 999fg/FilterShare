@@ -3,7 +3,6 @@ package team16.filtershare;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.media.effect.Effect;
 import android.media.effect.EffectContext;
 import android.media.effect.EffectFactory;
@@ -11,7 +10,6 @@ import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.GLUtils;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -21,8 +19,6 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
-
-import org.w3c.dom.Text;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -130,8 +126,8 @@ public class FilterMakingActivity extends AppCompatActivity implements GLSurface
                 currentEffect = FilterEffect.TEMPERATURE;
                 inflateSlider();
                 break;
-            case R.id.tint_button:
-                currentEffect = FilterEffect.TINT;
+            case R.id.fade_button:
+                currentEffect = FilterEffect.FADE;
                 inflateSlider();
                 break;
             case R.id.vignette_button:
@@ -161,9 +157,11 @@ public class FilterMakingActivity extends AppCompatActivity implements GLSurface
         // Generate textures
         GLES20.glGenTextures(3, mTextures, 0);
 
+        GlobalVariables sfApp = ((GlobalVariables)getApplicationContext());
+        String picturepath = sfApp.get_picture_path();
+        Bitmap bitmap = BitmapFactory.decodeFile(picturepath);
         // Load input bitmap
-        Bitmap bitmap = BitmapFactory.decodeResource(getResources(),
-                R.drawable.test_vertical);
+
         mImageWidth = bitmap.getWidth();
         mImageHeight = bitmap.getHeight();
         mTexRenderer.updateTextureSize(mImageWidth, mImageHeight);
@@ -237,11 +235,11 @@ public class FilterMakingActivity extends AppCompatActivity implements GLSurface
                     mEffectCount++;
                 }
                 break;
-            case TINT:
-                Log.d("TN PROGRESS:", Integer.toString(progress));
+            case FADE:
+                Log.d("FL PROGRESS:", Integer.toString(progress));
                 mEffectArray[5] = effectFactory.createEffect(
-                        EffectFactory.EFFECT_TINT);
-                mEffectArray[5].setParameter("tint", Color.MAGENTA);
+                        EffectFactory.EFFECT_FILLLIGHT);
+                mEffectArray[5].setParameter("strength", (float) progress / 100);
                 isEffectApplied[5] = true;
                 if (mEffectCount == 0) {
                     firstEffect = 5;
@@ -342,6 +340,9 @@ public class FilterMakingActivity extends AppCompatActivity implements GLSurface
         //Inflate the slider view
         bottomBar = getLayoutInflater().inflate(R.layout.activity_make_filter_slider, parent, false);
         parent.addView(bottomBar, index);
+
+        TextView effectName = (TextView) findViewById(R.id.effect_name);
+        effectName.setText(currentEffect.getName().toUpperCase());
 
         Button cancelButton = (Button) findViewById(R.id.cancel_button);
         cancelButton.setOnClickListener(this);
