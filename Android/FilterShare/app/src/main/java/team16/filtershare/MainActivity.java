@@ -24,6 +24,7 @@ import android.util.Log;
 import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
@@ -63,6 +64,8 @@ public class MainActivity extends Activity {
     private static int front_camera = -1;
     private static int back_camera = -1;
     private static int current_camera = -1;
+    private static TransparentRect mUpperRect = null;
+    private static TransparentRect mLowerRect = null;
 
 
     @Override
@@ -101,10 +104,38 @@ public class MainActivity extends Activity {
         else
             Log.e("NO", "checkCameraHardware failed");
 
+        Display display = getWindowManager().getDefaultDisplay();
+        final Point screen_size = new Point();
+        display.getSize(screen_size);
+
+        final ImageButton changeButton = (ImageButton) findViewById(R.id.change_camera);
+
+        changeButton.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                changeButton.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                changeButton.getHeight(); //height is ready
+                mUpperRect = (TransparentRect) findViewById(R.id.upper_rect);
+                mUpperRect.setScreenSize(screen_size.x, screen_size.y -changeButton.getHeight());
+                Log.d("icon height", "icon height: "+ changeButton.getHeight());
+
+
+
+                mUpperRect.setUpper();
+
+                mLowerRect = (TransparentRect) findViewById(R.id.lower_rect);
+                mLowerRect.setScreenSize(screen_size.x, screen_size.y -changeButton.getHeight());
+                mLowerRect.setLower();
+            }
+        });
+
+
+
+
         //set camera to continually auto-focus
         setViews();
 
-        ImageButton changeButton = (ImageButton) findViewById(R.id.change_camera);
+
         changeButton.setOnClickListener(
                 new View.OnClickListener(){
                     @Override
@@ -153,10 +184,7 @@ public class MainActivity extends Activity {
 
         final RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
         layoutParams.addRule(RelativeLayout.CENTER_HORIZONTAL);
-        Display display = getWindowManager().getDefaultDisplay();
-        Point size = new Point();
-        display.getSize(size);
-        layoutParams.setMargins(0, size.y *3/10, 0, 0);
+        layoutParams.setMargins(0, screen_size.y *3/10, 0, 0);
 
         mShowcaseView1.setButtonPosition(layoutParams);
         //mShowcaseView1.forceTextPosition(ShowcaseView.LEFT_OF_SHOWCASE);
@@ -220,6 +248,8 @@ public class MainActivity extends Activity {
             };
 
         });
+
+
 
 
 
@@ -405,10 +435,13 @@ public class MainActivity extends Activity {
     private void releaseCamera(){
         if (mCamera != null){
             Log.d("Camera Release", "Camera is released");
+            FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
+            preview.removeView(mPreview);
             mCamera.setPreviewCallback(null);
             mPreview.getHolder().removeCallback(mPreview);
             mCamera.release();        // release the camera for other applications
             mCamera = null;
+
 
         }
     }
@@ -561,6 +594,7 @@ public class MainActivity extends Activity {
         final FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
         preview.addView(mPreview);
 
+
         if (hasAutoFocus) {
             mAutofocusRect = (AutofocusRect) findViewById(R.id.af_rect);
             mAutofocusRect.setParentInfo(mPreview.getWidth(), mPreview.getHeight());
@@ -575,7 +609,7 @@ public class MainActivity extends Activity {
                         Rect focusRect = calculateFocusArea(event.getX(), event.getY());
                         Log.d("Rect", focusRect.toString());
                         Log.d("Rect_ctr", "x: " + focusRect.centerX() + "y:" + focusRect.centerY());
-                        Log.d("event_ctr", "x: " + event.getX() + "y:" + event.getX());
+                        Log.d("event_ctr", "x: " + event.getX() + "y:" + event.getY());
 
                         mAutofocusRect.setLocation(event.getX(), event.getY());
                         mAutofocusRect.showStart();

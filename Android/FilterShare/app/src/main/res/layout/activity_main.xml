@@ -8,7 +8,9 @@
         android:id="@+id/preview_parent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1">
+        android:layout_weight="1"
+
+        >
         <FrameLayout
             android:id="@+id/camera_preview"
             android:layout_width="match_parent"
@@ -22,6 +24,23 @@
             android:layout_height="60dp"
             android:clipChildren="false">
         </team16.filtershare.AutofocusRect>
+
+        <team16.filtershare.TransparentRect
+            android:id="@+id/upper_rect"
+            android:layout_width="match_parent"
+            android:layout_height="10dp"
+            android:clipChildren="false">
+        </team16.filtershare.TransparentRect>
+
+        <team16.filtershare.TransparentRect
+            android:id="@+id/lower_rect"
+            android:layout_width="match_parent"
+            android:layout_height="10dp"
+            android:clipChildren="false">
+        </team16.filtershare.TransparentRect>
+
+
+
 
 
 

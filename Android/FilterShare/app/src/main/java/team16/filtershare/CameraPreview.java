@@ -25,8 +25,10 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 
         // supported preview sizes
         mSupportedPreviewSizes = mCamera.getParameters().getSupportedPreviewSizes();
+        /*
         for(Camera.Size str: mSupportedPreviewSizes)
             Log.e("supportedPreviewSizes", str.width + "/" + str.height);
+            */
 
         // Install a SurfaceHolder.Callback so we get notified when the
         // underlying surface is created and destroyed.
@@ -84,9 +86,10 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
             //setCameraDisplayOrientation((Activity)getContext(), MainActivity.cameraId,mCamera);
             mCamera.setDisplayOrientation(90);
             mCamera.setPreviewDisplay(mHolder);
-            
+
             Camera.Parameters parameters = mCamera.getParameters();
             parameters.setPreviewSize(mPreviewSize.width, mPreviewSize.height);
+            //Log.d("preview wh", "w: "+mPreviewSize.width+" h: "+mPreviewSize.height);
             mCamera.setParameters(parameters);
 
             mCamera.startPreview();
