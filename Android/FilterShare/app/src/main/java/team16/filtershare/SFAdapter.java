@@ -66,6 +66,13 @@ public class SFAdapter extends RecyclerView.Adapter<SFAdapter.ViewHolder> {
             filter_hashtags += "#"+hashtags[i]+" ";
         holder.filterHashtags.setText(filter_hashtags);
         holder.filterMadeby.setText(sfDataset.get(position).madeby);
+
+        holder.imageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
     }
 
     @Override

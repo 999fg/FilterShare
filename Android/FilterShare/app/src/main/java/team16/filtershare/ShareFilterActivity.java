@@ -69,30 +69,29 @@ public class ShareFilterActivity extends AppCompatActivity {
         sfDataset = new ArrayList<>();
         adapter = new SFAdapter(sfDataset);
         recyclerView.setAdapter(adapter);
-        biggest = 65; //TODO: filter_biggest API to be implemented
-        biggest = biggest - 5 + (biggest%5 - 5);
+        biggest = 0; //TODO: filter_biggest API to be implemented
 
         recyclerView.addOnScrollListener(new EndlessRecyclerOnScrollListener(layoutManager) {
             @Override
             public void onLoadMore(int current_page) {
-                if(biggest >= 20)
+                if(biggest <= 45)
                     new queryAsyncTask(bitimg).execute(biggest+"");
-                if(biggest == 20)
-                    biggest = -1;
-                else if (biggest < 25)
-                    biggest = 20;
+                if(biggest == 45)
+                    biggest = 46;
+                else if (biggest > 40)
+                    biggest = 45;
                 else
-                    biggest = biggest - 5;
+                    biggest = biggest + 5;
             }
         });
         queryAsyncTask QAT = new queryAsyncTask(bitimg);
         QAT.execute(biggest+"");
-        if(biggest == 20)
-            biggest = -1;
-        else if (biggest < 25)
-            biggest = 20;
+        if(biggest == 45)
+            biggest = 46;
+        else if (biggest > 40)
+            biggest = 45;
         else
-            biggest = biggest - 5;
+            biggest = biggest + 5;
     }
 
     @Override
@@ -180,12 +179,29 @@ public class ShareFilterActivity extends AppCompatActivity {
             PrettyTime p = new PrettyTime();
             for (int i = 0; i<jsonArray.length(); i++){
                 JSONObject jo = null;
+                JSONArray jotags = null;
                 try {
                     jo = jsonArray.getJSONObject(i);
+                    jotags = new JSONArray(jo.optString("tags"));
                 } catch(JSONException e) {
                     e.printStackTrace();
                 }
-                sfDataset.add(new SFData(bitimg, jo.optString("name"), 22803, new String[]{"dark", "bright", "daily"}, jo.optString("username") + ", " + p.format(new Date(Long.parseLong(jo.optString("date_created"))))));
+                Log.e("json", jo.optString("tags"));
+                String[] tags = new String[jotags.length()];
+                for (int j = 0; j<jotags.length(); j++){
+                    try {
+                        tags[j] = jotags.get(j) + "";
+                    } catch(JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                sfDataset.add(new SFData(
+                        bitimg,
+                        jo.optString("name"),
+                        22803,
+                        tags,
+                        jo.optString("username") + ", " + p.format(new Date(Long.parseLong(jo.optString("date_created"))))));
             }
             adapter.notifyItemInserted(0);
         }
