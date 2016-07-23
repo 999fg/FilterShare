@@ -27,8 +27,9 @@ $filter_query = DB::getDB()->query("
 	atr_temperature as temperature,
 	atr_tint as tint,
 	atr_vignette as vignette,
-	atr_grain as grain
-	FROM filters
+	atr_grain as grain,
+	(SELECT COUNT(*) FROM filters_used WHERE filter_id = filt.filter_id) as use_count
+	FROM filters filt
 	ORDER BY filter_id DESC
 	LIMIT :start, 5
 ",
