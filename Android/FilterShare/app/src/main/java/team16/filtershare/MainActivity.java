@@ -2,8 +2,11 @@ package team16.filtershare;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -41,7 +44,9 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by shinjaemin on 2016. 7. 6..
@@ -54,6 +59,8 @@ public class MainActivity extends Activity {
     public static final int MEDIA_TYPE_IMAGE = 1;
     //This app doesn't use VIDEO but I left it just in case.
     public static final int MEDIA_TYPE_VIDEO = 2;
+
+    private static final int REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS = 0;
 
     public static final int GALLERY_INTENT = 0;
     private static  final int FOCUS_AREA_SIZE= 300;
@@ -68,192 +75,103 @@ public class MainActivity extends Activity {
     private static TransparentRect mLowerRect = null;
 
 
+
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // check Android 6 permission
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
-                == PackageManager.PERMISSION_GRANTED) {
-            //pass
-            Log.d("permission", "pass permission");
-        } else {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.CAMERA},
-                    0);
-        }
-
-
-        // Create an instance of Camera
-        if(checkCameraHardware(this)) {
-            Log.d("Ok", "It has camera");
-            assignCameraId();
-
-            mCamera = getCameraInstance();
-            List<String> supportedFocusModes = mCamera.getParameters().getSupportedFocusModes();
-            hasAutoFocus = supportedFocusModes != null && supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO);
-
-
-
-
-            if (mCamera==null)
-                Log.e("Fail", "no Camera Instance");
-        }
-        else
-            Log.e("NO", "checkCameraHardware failed");
-
-        Display display = getWindowManager().getDefaultDisplay();
-        final Point screen_size = new Point();
-        display.getSize(screen_size);
-
-        final ImageButton changeButton = (ImageButton) findViewById(R.id.change_camera);
-
-        changeButton.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                changeButton.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                changeButton.getHeight(); //height is ready
-                mUpperRect = (TransparentRect) findViewById(R.id.upper_rect);
-                mUpperRect.setScreenSize(screen_size.x, screen_size.y -changeButton.getHeight());
-                Log.d("icon height", "icon height: "+ changeButton.getHeight());
-
-
-
-                mUpperRect.setUpper();
-
-                mLowerRect = (TransparentRect) findViewById(R.id.lower_rect);
-                mLowerRect.setScreenSize(screen_size.x, screen_size.y -changeButton.getHeight());
-                mLowerRect.setLower();
-            }
-        });
-
-
-
-
-        //set camera to continually auto-focus
-        setViews();
-
-
-        changeButton.setOnClickListener(
-                new View.OnClickListener(){
-                    @Override
-                    public void onClick(View v){
-                        mCamera.release();
-                        if(cameraId == front_camera && back_camera!=-1){
-                            cameraId = back_camera;
-                        }
-                        else if(cameraId == back_camera && front_camera!=-1){
-                            cameraId = front_camera;
-                        }
-                        FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
-                        preview.removeView(mPreview);
-
-
-                        mCamera=getCameraInstance();
-                        List<String> supportedFocusModes = mCamera.getParameters().getSupportedFocusModes();
-                        hasAutoFocus = supportedFocusModes != null && supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO);
-                        Log.d("change_autofocus", "change_auto?: "+hasAutoFocus);
-                        setViews();
-
-
-                        // Create our Preview view and set it as the content of our activity.
-                        //mPreview = new CameraPreview(MainActivity.this, mCamera);
-                        //preview.addView(mPreview);
-
-
-
-                    }
-                }
-        );
-
-
-        ImageButton mCapture = (ImageButton) findViewById(R.id.button_capture);
-
-        ShowcaseView mShowcaseView1 = new ShowcaseView.Builder(this)
-
-                .setTarget(new ViewTarget(mCapture))
-                .setContentTitle("Select a picture by taking a photo")
-                .setContentText("Take your own photo to apply FilterShare filters. ")
-                //.setStyle(R.style.CustomShowcaseTheme2)
-                .blockAllTouches()
-                .replaceEndButton(R.layout.scv_button)
-
-                .build();
-
-        final RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-        layoutParams.addRule(RelativeLayout.CENTER_HORIZONTAL);
-        layoutParams.setMargins(0, screen_size.y *3/10, 0, 0);
-
-        mShowcaseView1.setButtonPosition(layoutParams);
-        //mShowcaseView1.forceTextPosition(ShowcaseView.LEFT_OF_SHOWCASE);
-
-        mShowcaseView1.setOnShowcaseEventListener(new OnShowcaseEventListener() {
-            @Override
-            public void onShowcaseViewHide(ShowcaseView showcaseView) {
-                ImageButton mButton_gallery = (ImageButton) findViewById(R.id.button_gallery);
-
-                ShowcaseView mShowcaseView2 = new ShowcaseView.Builder(MainActivity.this)
-
-                        .setTarget(new ViewTarget(mButton_gallery))
-                        .setContentTitle("Select a picture by picking up from gallery")
-                        .setContentText("Pick up the existing picture from gallery to apply FilterShare filters.")
-                        //.setStyle(R.style.CustomShowcaseTheme2)
-                        .blockAllTouches()
-
-                        .replaceEndButton(R.layout.scv_button)
-
-                        .build();
-                mShowcaseView2.setButtonPosition(layoutParams);
-
-
-            }
-            @Override
-            public void onShowcaseViewDidHide(ShowcaseView showcaseView) {
-
-            }
-
-            @Override
-            public void onShowcaseViewShow(ShowcaseView showcaseView) {
-
-            }
-
-            @Override
-            public void onShowcaseViewTouchBlocked(MotionEvent motionEvent) {
-
-            };
-
-
-            OnShowcaseEventListener NONE = new OnShowcaseEventListener() {
-                @Override
-                public void onShowcaseViewHide(ShowcaseView showcaseView) {
-
-                }
-
-                @Override
-                public void onShowcaseViewDidHide(ShowcaseView showcaseView) {
-
-                }
-
-                @Override
-                public void onShowcaseViewShow(ShowcaseView showcaseView) {
-
-                }
-
-                @Override
-                public void onShowcaseViewTouchBlocked(MotionEvent motionEvent) {
-
-                }
-            };
-
-        });
-
-
-
-
+        checkEveryPermissionAndStart();
 
     }
+
+    private void checkEveryPermissionAndStart() {
+        List<String> permissionsNeeded = new ArrayList<String>();
+
+        final List<String> permissionsList = new ArrayList<String>();
+        if (!addPermission(permissionsList, Manifest.permission.CAMERA))
+            permissionsNeeded.add("Camera");
+        if (!addPermission(permissionsList, Manifest.permission.WRITE_EXTERNAL_STORAGE))
+            permissionsNeeded.add("External storage");
+
+
+        if (permissionsList.size() > 0) {
+            if (permissionsNeeded.size() > 0) {
+                // Need Rationale
+                String message = "You need to grant access to " + permissionsNeeded.get(0);
+                for (int i = 1; i < permissionsNeeded.size(); i++)
+                    message = message + ", " + permissionsNeeded.get(i);
+                showMessageOKCancel(message,
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                ActivityCompat.requestPermissions(MainActivity.this, permissionsList.toArray(new String[permissionsList.size()]),
+                                        REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS);
+                            }
+                        });
+                return;
+            }
+            ActivityCompat.requestPermissions(MainActivity.this, permissionsList.toArray(new String[permissionsList.size()]),
+                    REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS);
+            return;
+        }
+        //Don't start applicaton without permissoins
+        mainActivityOnCreate();
+    }
+
+    private boolean addPermission(List<String> permissionsList, String permission) {
+        if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+            permissionsList.add(permission);
+            // Check for Rationale Option
+
+            if (!ActivityCompat.shouldShowRequestPermissionRationale(this, permission))
+                return false;
+        }
+        return true;
+    }
+
+    private void showMessageOKCancel(String message, DialogInterface.OnClickListener okListener) {
+        new AlertDialog.Builder(MainActivity.this)
+                .setMessage(message)
+                .setPositiveButton("OK", okListener)
+                .setNegativeButton("Cancel", null)
+                .create()
+                .show();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[],
+                                           @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS:
+            {
+                Map<String, Integer> perms = new HashMap<String, Integer>();
+                // Initial
+                perms.put(Manifest.permission.CAMERA, PackageManager.PERMISSION_GRANTED);
+                perms.put(Manifest.permission.WRITE_EXTERNAL_STORAGE, PackageManager.PERMISSION_GRANTED);
+
+                // Fill with results
+                for (int i = 0; i < permissions.length; i++)
+                    perms.put(permissions[i], grantResults[i]);
+                // Check for ACCESS_FINE_LOCATION
+                if (perms.get(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
+                        && perms.get(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED){
+                    // All Permissions Granted
+                    mainActivityOnCreate();
+                } else {
+                    // Permission Denied
+                    Toast.makeText(MainActivity.this, "Some Permission is Denied", Toast.LENGTH_SHORT)
+                            .show();
+                }
+            }
+            break;
+            default:
+                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
+    }
+
 
 
 
@@ -778,6 +696,9 @@ public class MainActivity extends Activity {
                 resizedImage.compress(Bitmap.CompressFormat.JPEG, 100, fos);
                 fos.close();
 
+                GlobalVariables mApp = ((GlobalVariables)getApplicationContext());
+                mApp.set_picture_path(pictureFile.getAbsolutePath());
+
 
 
             } catch (FileNotFoundException e) {
@@ -786,8 +707,7 @@ public class MainActivity extends Activity {
                 Log.d("PictureCallback", "Error accessing file: " + e.getMessage());
             }
 
-            GlobalVariables mApp = ((GlobalVariables)getApplicationContext());
-            mApp.set_picture_path(pictureFile.getAbsolutePath());
+
 
             Intent intent = new Intent(MainActivity.this, PhotoConfirmActivity.class);
             startActivity(intent);
@@ -798,19 +718,186 @@ public class MainActivity extends Activity {
     };
 
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[],
-                                           @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case 0: {
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // permission was granted
-                } else {
-                    setResult(Activity.RESULT_CANCELED);
-                    finish();
-                }
+
+
+    private void mainActivityOnCreate(){
+        // Create an instance of Camera
+        if(checkCameraHardware(this)) {
+            Log.d("Ok", "It has camera");
+            assignCameraId();
+
+            mCamera = getCameraInstance();
+            List<String> supportedFocusModes = mCamera.getParameters().getSupportedFocusModes();
+            hasAutoFocus = supportedFocusModes != null && supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO);
+
+
+
+
+            if (mCamera==null)
+                Log.e("Fail", "no Camera Instance");
+        }
+        else
+            Log.e("NO", "checkCameraHardware failed");
+
+        Display display = getWindowManager().getDefaultDisplay();
+        final Point screen_size = new Point();
+        display.getSize(screen_size);
+
+        final ImageButton changeButton = (ImageButton) findViewById(R.id.change_camera);
+
+        changeButton.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                changeButton.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                changeButton.getHeight(); //height is ready
+                mUpperRect = (TransparentRect) findViewById(R.id.upper_rect);
+                mUpperRect.setScreenSize(screen_size.x, screen_size.y -changeButton.getHeight());
+                Log.d("icon height", "icon height: "+ changeButton.getHeight());
+
+
+
+                mUpperRect.setUpper();
+
+                mLowerRect = (TransparentRect) findViewById(R.id.lower_rect);
+                mLowerRect.setScreenSize(screen_size.x, screen_size.y -changeButton.getHeight());
+                mLowerRect.setLower();
             }
+        });
+
+
+
+
+        //set camera to continually auto-focus
+        setViews();
+
+
+        changeButton.setOnClickListener(
+                new View.OnClickListener(){
+                    @Override
+                    public void onClick(View v){
+                        mCamera.release();
+                        if(cameraId == front_camera && back_camera!=-1){
+                            cameraId = back_camera;
+                        }
+                        else if(cameraId == back_camera && front_camera!=-1){
+                            cameraId = front_camera;
+                        }
+                        FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
+                        preview.removeView(mPreview);
+
+
+                        mCamera=getCameraInstance();
+                        List<String> supportedFocusModes = mCamera.getParameters().getSupportedFocusModes();
+                        hasAutoFocus = supportedFocusModes != null && supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO);
+                        Log.d("change_autofocus", "change_auto?: "+hasAutoFocus);
+                        setViews();
+
+
+                        // Create our Preview view and set it as the content of our activity.
+                        //mPreview = new CameraPreview(MainActivity.this, mCamera);
+                        //preview.addView(mPreview);
+
+
+
+                    }
+                }
+        );
+
+
+        ImageButton mCapture = (ImageButton) findViewById(R.id.button_capture);
+
+        SharedPreferences sharedPref = MainActivity.this.getPreferences(Context.MODE_PRIVATE);
+        boolean didTutorial = sharedPref.getBoolean("didTutorial", false);
+
+
+
+        if(!didTutorial) {
+            ShowcaseView mShowcaseView1 = new ShowcaseView.Builder(this)
+
+                    .setTarget(new ViewTarget(mCapture))
+                    .setContentTitle("Select a picture by taking a photo")
+                    .setContentText("Take your own photo to apply FilterShare filters. ")
+                    //.setStyle(R.style.CustomShowcaseTheme2)
+                    .blockAllTouches()
+                    .replaceEndButton(R.layout.scv_button)
+
+                    .build();
+
+            final RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+            layoutParams.addRule(RelativeLayout.CENTER_HORIZONTAL);
+            layoutParams.setMargins(0, screen_size.y * 3 / 10, 0, 0);
+
+            mShowcaseView1.setButtonPosition(layoutParams);
+            //mShowcaseView1.forceTextPosition(ShowcaseView.LEFT_OF_SHOWCASE);
+
+            mShowcaseView1.setOnShowcaseEventListener(new OnShowcaseEventListener() {
+                @Override
+                public void onShowcaseViewHide(ShowcaseView showcaseView) {
+                    ImageButton mButton_gallery = (ImageButton) findViewById(R.id.button_gallery);
+
+                    ShowcaseView mShowcaseView2 = new ShowcaseView.Builder(MainActivity.this)
+
+                            .setTarget(new ViewTarget(mButton_gallery))
+                            .setContentTitle("Select a picture by picking up from gallery")
+                            .setContentText("Pick up the existing picture from gallery to apply FilterShare filters.")
+                            //.setStyle(R.style.CustomShowcaseTheme2)
+                            .blockAllTouches()
+
+                            .replaceEndButton(R.layout.scv_button)
+
+                            .build();
+                    mShowcaseView2.setButtonPosition(layoutParams);
+
+                    SharedPreferences sharedPref = MainActivity.this.getPreferences(Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedPref.edit();
+                    editor.putBoolean("didTutorial", true);
+                    editor.commit();
+
+
+                }
+
+                @Override
+                public void onShowcaseViewDidHide(ShowcaseView showcaseView) {
+
+
+                }
+
+                @Override
+                public void onShowcaseViewShow(ShowcaseView showcaseView) {
+
+                }
+
+                @Override
+                public void onShowcaseViewTouchBlocked(MotionEvent motionEvent) {
+
+                }
+
+                ;
+
+
+                OnShowcaseEventListener NONE = new OnShowcaseEventListener() {
+                    @Override
+                    public void onShowcaseViewHide(ShowcaseView showcaseView) {
+
+                    }
+
+                    @Override
+                    public void onShowcaseViewDidHide(ShowcaseView showcaseView) {
+
+                    }
+
+                    @Override
+                    public void onShowcaseViewShow(ShowcaseView showcaseView) {
+
+                    }
+
+                    @Override
+                    public void onShowcaseViewTouchBlocked(MotionEvent motionEvent) {
+
+                    }
+                };
+
+            });
         }
     }
 }
