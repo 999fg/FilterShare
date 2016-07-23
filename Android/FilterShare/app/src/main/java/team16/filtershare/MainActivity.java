@@ -2,7 +2,6 @@ package team16.filtershare;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -23,6 +22,7 @@ import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.Display;
 import android.view.MotionEvent;
@@ -103,14 +103,17 @@ public class MainActivity extends Activity {
                 String message = "You need to grant access to " + permissionsNeeded.get(0);
                 for (int i = 1; i < permissionsNeeded.size(); i++)
                     message = message + ", " + permissionsNeeded.get(i);
+                ActivityCompat.requestPermissions(MainActivity.this, permissionsList.toArray(new String[permissionsList.size()]),
+                        REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS);
+                /*
                 showMessageOKCancel(message,
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                ActivityCompat.requestPermissions(MainActivity.this, permissionsList.toArray(new String[permissionsList.size()]),
-                                        REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS);
+
                             }
                         });
+                        */
                 return;
             }
             ActivityCompat.requestPermissions(MainActivity.this, permissionsList.toArray(new String[permissionsList.size()]),
@@ -164,6 +167,7 @@ public class MainActivity extends Activity {
                     // Permission Denied
                     Toast.makeText(MainActivity.this, "Some Permission is Denied", Toast.LENGTH_SHORT)
                             .show();
+                    finish();
                 }
             }
             break;
