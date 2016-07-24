@@ -201,7 +201,16 @@ public class ShareFilterActivity extends AppCompatActivity {
                         jo.optString("name"),
                         22803,
                         tags,
-                        jo.optString("username") + ", " + p.format(new Date(Long.parseLong(jo.optString("date_created"))))));
+                        jo.optString("username") + ", " + p.format(new Date(Long.parseLong(jo.optString("date_created")))),
+                        jo.optInt("brightness"),
+                        jo.optInt("contrast"),
+                        jo.optInt("saturation"),
+                        jo.optInt("sharpen"),
+                        jo.optInt("temperature"),
+                        jo.optInt("tint"),
+                        jo.optInt("vignette"),
+                        jo.optInt("grain")
+                ));
             }
             adapter.notifyItemInserted(0);
         }

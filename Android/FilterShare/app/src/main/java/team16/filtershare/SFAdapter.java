@@ -54,7 +54,15 @@ public class SFAdapter extends RecyclerView.Adapter<SFAdapter.ViewHolder> {
         int filter_likes = sfDataset.get(position).likes;
         String filter_hashtags = "";
         String[] hashtags = sfDataset.get(position).hashtags;
-        holder.imageView.setImageBitmap(sfDataset.get(position).imgbit);
+        holder.imageView.setImageBitmap(BitmapProcessing.applyEffects(sfDataset.get(position).imgbit,
+                sfDataset.get(position).brightness,
+                sfDataset.get(position).contrast,
+                sfDataset.get(position).saturation,
+                sfDataset.get(position).sharpen,
+                sfDataset.get(position).temperature,
+                sfDataset.get(position).tint,
+                sfDataset.get(position).vignette,
+                sfDataset.get(position).grain));
         holder.filterTitle.setText(sfDataset.get(position).title);
         if (filter_likes > 999999)
             holder.filterLikes.setText(Double.parseDouble(String.format("%.2f",(double) filter_likes / 1000000)) + "M times used");
@@ -87,11 +95,29 @@ class SFData{
     public int likes;
     public String[] hashtags;
     public String madeby;
-    public SFData(Bitmap imgbit, String title, int likes, String[] hashtags, String madeby){
+    public int brightness;
+    public int contrast;
+    public int saturation;
+    public int sharpen;
+    public int temperature;
+    public int tint;
+    public int vignette;
+    public int grain;
+    public SFData(Bitmap imgbit, String title, int likes, String[] hashtags, String madeby,
+                  int brightness, int contrast, int saturation, int sharpen, int temperature,
+                  int tint, int vignette, int grain){
         this.imgbit = imgbit;
         this.title = title;
         this.likes = likes;
         this.hashtags = hashtags;
         this.madeby = madeby;
+        this.brightness = brightness;
+        this.contrast = contrast;
+        this.saturation = saturation;
+        this.sharpen = sharpen;
+        this.temperature = temperature;
+        this.tint = tint;
+        this.vignette = vignette;
+        this.grain = grain;
     }
 }
