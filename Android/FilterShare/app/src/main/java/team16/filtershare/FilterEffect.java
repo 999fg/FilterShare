@@ -9,7 +9,7 @@ public enum FilterEffect {
     SATURATION ("saturation", 50),
     SHARPEN ("sharpen", 0),
     TEMPERATURE ("temperature", 50),
-    FADE ("strength", 0),
+    TINT ("tint", 0),
     VIGNETTE ("vignette", 0),
     GRAIN ("grain", 0);
 

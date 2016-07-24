@@ -16,9 +16,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
+
+import java.util.logging.Filter;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -27,34 +30,25 @@ import javax.microedition.khronos.opengles.GL10;
  * Created by shinjaemin on 2016. 7. 6..
  */
 
-public class FilterMakingActivity extends AppCompatActivity implements GLSurfaceView.Renderer, View.OnClickListener{
-    private GLSurfaceView mEffectView;
-    private int[] mTextures = new int[3];
-    private EffectContext mEffectContext;
-    private TextureRenderer mTexRenderer = new TextureRenderer();
-    private int mImageWidth;
-    private int mImageHeight;
-    private boolean mInitialized = false;
-
-    private int progress = 0;
-    private int origProgress = 0;
-    private FilterEffect currentEffect = null;
-    private Effect[] mEffectArray = new Effect[8];
-    private boolean[] isEffectApplied = new boolean[]{false, false, false, false, false, false, false, false};
-    private int mEffectCount = 0;
-    private int firstEffect = 0;
-
+public class FilterMakingActivity extends AppCompatActivity implements View.OnClickListener{
+    FilterEffect currentEffect;
+    int origProgress;
+    int progress;
+    ImageView imgPreview;
+    Bitmap origBitmap;
+    int[] origEffects;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_make_filter);
 
-        /* Initial settings for image preview (GLSurfaceView) */
-        mEffectView = (GLSurfaceView) findViewById(R.id.imgPreview);
-        mEffectView.setEGLContextClientVersion(2);
-        mEffectView.setRenderer(this);
-        mEffectView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+        imgPreview = (ImageView) findViewById(R.id.imgPreview);
+
+        GlobalVariables sfApp = ((GlobalVariables)getApplicationContext());
+        String picturepath = sfApp.get_picture_path();
+        origBitmap = BitmapFactory.decodeFile(picturepath);
+        imgPreview.setImageBitmap(origBitmap);
 
         inflateEffects();
     }
@@ -81,8 +75,8 @@ public class FilterMakingActivity extends AppCompatActivity implements GLSurface
                 currentEffect = FilterEffect.TEMPERATURE;
                 inflateSlider();
                 break;
-            case R.id.fade_button:
-                currentEffect = FilterEffect.FADE;
+            case R.id.tint_button:
+                currentEffect = FilterEffect.TINT;
                 inflateSlider();
                 break;
             case R.id.vignette_button:
@@ -94,9 +88,8 @@ public class FilterMakingActivity extends AppCompatActivity implements GLSurface
                 inflateSlider();
                 break;
             case R.id.cancel_button:
+                currentEffect.setValue(origProgress);
                 inflateEffects();
-                progress = origProgress;
-                mEffectView.requestRender();
                 break;
             case R.id.done_button:
                 SeekBar seekBar = (SeekBar) findViewById(R.id.seek_bar);
@@ -104,177 +97,6 @@ public class FilterMakingActivity extends AppCompatActivity implements GLSurface
                 inflateEffects();
                 break;
         }
-    }
-
-    private void loadTextures() {
-        // Generate textures
-        GLES20.glGenTextures(3, mTextures, 0);
-
-        // Load selected image into bitmap
-        GlobalVariables sfApp = ((GlobalVariables)getApplicationContext());
-        String picturepath = sfApp.get_picture_path();
-        Bitmap bitmap = BitmapFactory.decodeFile(picturepath);
-
-        // Store bitmap info and update texture size
-        mImageWidth = bitmap.getWidth();
-        mImageHeight = bitmap.getHeight();
-        mTexRenderer.updateTextureSize(mImageWidth, mImageHeight);
-
-        // Upload to texture
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mTextures[0]);
-        GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bitmap, 0);
-
-        // Set texture parameters
-        GLToolbox.initTexParams();
-    }
-
-    private void initEffect(int progress) {
-        EffectFactory effectFactory = mEffectContext.getFactory();
-
-        switch (currentEffect) {
-            case BRIGHTNESS:
-                Log.d("BR PROGRESS:", Integer.toString(progress));
-                mEffectArray[0] = effectFactory.createEffect(EffectFactory.EFFECT_BRIGHTNESS);
-                mEffectArray[0].setParameter("brightness", ((float) progress / 100) + 1.0f);
-                isEffectApplied[0] = true;
-                if (mEffectCount == 0) {
-                    firstEffect = 0;
-                    mEffectCount++;
-                }
-                break;
-            case CONTRAST:
-                Log.d("CT PROGRESS:", Integer.toString(progress));
-                mEffectArray[1] = effectFactory.createEffect(EffectFactory.EFFECT_CONTRAST);
-                mEffectArray[1].setParameter("contrast", ((float) progress / 100) + 1.0f);
-                isEffectApplied[1] = true;
-                if (mEffectCount == 0) {
-                    firstEffect = 1;
-                    mEffectCount++;
-                }
-                break;
-            case SATURATION:
-                Log.d("ST PROGRESS:", Integer.toString(progress));
-                mEffectArray[2] = effectFactory.createEffect(
-                        EffectFactory.EFFECT_SATURATE);
-                mEffectArray[2].setParameter("scale", (((float) progress / 100) - 0.5f) * 2);
-                isEffectApplied[2] = true;
-                if (mEffectCount == 0) {
-                    firstEffect = 2;
-                    mEffectCount++;
-                }
-                break;
-            case SHARPEN:
-                Log.d("SH PROGRESS:", Integer.toString(progress));
-                mEffectArray[3] = effectFactory.createEffect(
-                        EffectFactory.EFFECT_SHARPEN);
-                mEffectArray[3].setParameter("scale", ((float) progress / 100));
-                isEffectApplied[3] = true;
-                if (mEffectCount == 0) {
-                    firstEffect = 3;
-                    mEffectCount++;
-                }
-                break;
-            case TEMPERATURE:
-                Log.d("TM PROGRESS:", Integer.toString(progress));
-                mEffectArray[4] = effectFactory.createEffect(
-                        EffectFactory.EFFECT_TEMPERATURE);
-                mEffectArray[4].setParameter("scale", ((float) progress / 100));
-                isEffectApplied[4] = true;
-                if (mEffectCount == 0) {
-                    firstEffect = 4;
-                    mEffectCount++;
-                }
-                break;
-            case FADE:
-                Log.d("FL PROGRESS:", Integer.toString(progress));
-                mEffectArray[5] = effectFactory.createEffect(
-                        EffectFactory.EFFECT_FILLLIGHT);
-                mEffectArray[5].setParameter("strength", (float) progress / 100);
-                isEffectApplied[5] = true;
-                if (mEffectCount == 0) {
-                    firstEffect = 5;
-                    mEffectCount++;
-                }
-                break;
-            case VIGNETTE:
-                Log.d("VG PROGRESS:", Integer.toString(progress));
-                mEffectArray[6] = effectFactory.createEffect(
-                        EffectFactory.EFFECT_VIGNETTE);
-                mEffectArray[6].setParameter("scale", ((float) progress / 100));
-                isEffectApplied[6] = true;
-                if (mEffectCount == 0) {
-                    firstEffect = 6;
-                    mEffectCount++;
-                }
-                break;
-            case GRAIN:
-                Log.d("GR PROGRESS:", Integer.toString(progress));
-                mEffectArray[7] = effectFactory.createEffect(
-                        EffectFactory.EFFECT_GRAIN);
-                mEffectArray[7].setParameter("strength", ((float) progress / 100));
-                isEffectApplied[7] = true;
-                if (mEffectCount == 0) {
-                    firstEffect = 7;
-                    mEffectCount++;
-                }
-                break;
-            default:
-                break;
-        }
-    }
-
-    private void applyEffect() {
-        if (mEffectCount > 0) {
-            mEffectArray[firstEffect].apply(mTextures[0], mImageWidth, mImageHeight, mTextures[1]);
-            for (FilterEffect f : FilterEffect.values()) { // if more that one effect
-                if (isEffectApplied[f.ordinal()]) {
-                    int sourceTexture = mTextures[1];
-                    int destinationTexture = mTextures[2];
-                    mEffectArray[f.ordinal()].apply(sourceTexture, mImageWidth, mImageHeight, destinationTexture);
-                    mTextures[1] = destinationTexture; // changing the textures array, so 1 is always the texture for output,
-                    mTextures[2] = sourceTexture; // 2 is always the sparse texture
-                }
-            }
-        }
-    }
-
-    private void renderResult() {
-        if (currentEffect != null) {
-            // if no effect is chosen, just render the original bitmap
-            mTexRenderer.renderTexture(mTextures[1]);
-        } else {
-            // render the result of applyEffect()
-            mTexRenderer.renderTexture(mTextures[0]);
-        }
-    }
-
-    @Override
-    public void onDrawFrame(GL10 gl) {
-        if (!mInitialized) {
-            //Only need to do this once
-            mEffectContext = EffectContext.createWithCurrentGlContext();
-            mTexRenderer.init();
-            loadTextures();
-            mInitialized = true;
-        }
-        if (currentEffect != null) {
-            Log.d("IN", "HERE");
-            //if an effect is chosen initialize it and apply it to the texture
-            initEffect(progress);
-            applyEffect();
-        }
-        renderResult();
-    }
-
-    @Override
-    public void onSurfaceChanged(GL10 gl, int width, int height) {
-        if (mTexRenderer != null) {
-            mTexRenderer.updateViewSize(width, height);
-        }
-    }
-
-    @Override
-    public void onSurfaceCreated(GL10 gl, EGLConfig config) {
     }
 
     private void inflateSlider() {
@@ -300,6 +122,7 @@ public class FilterMakingActivity extends AppCompatActivity implements GLSurface
         doneButton.setOnClickListener(this);
 
         origProgress = (int) currentEffect.getValue();
+
         SeekBar seekBar = (SeekBar) findViewById(R.id.seek_bar);
         seekBar.setProgress(origProgress);
         TextView seekBarValue = (TextView) findViewById(R.id.seek_bar_value);
@@ -307,12 +130,6 @@ public class FilterMakingActivity extends AppCompatActivity implements GLSurface
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean b) {
-                progress = seekBar.getProgress();
-                Log.d("progress", Integer.toString(progress));
-                mEffectView.requestRender();
-
-                TextView seekBarValue = (TextView) findViewById(R.id.seek_bar_value);
-                seekBarValue.setText(Integer.toString(progress));
             }
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
@@ -321,7 +138,16 @@ public class FilterMakingActivity extends AppCompatActivity implements GLSurface
             public void onStopTrackingTouch(SeekBar seekBar) {
                 progress = seekBar.getProgress();
                 Log.d("progress", Integer.toString(progress));
-                mEffectView.requestRender();
+                currentEffect.setValue(progress);
+                imgPreview.setImageBitmap(BitmapProcessing.applyEffects(origBitmap,
+                        FilterEffect.BRIGHTNESS.getValue(),
+                        FilterEffect.CONTRAST.getValue(),
+                        FilterEffect.SATURATION.getValue(),
+                        FilterEffect.SHARPEN.getValue(),
+                        FilterEffect.TEMPERATURE.getValue(),
+                        FilterEffect.TINT.getValue(),
+                        FilterEffect.VIGNETTE.getValue(),
+                        FilterEffect.GRAIN.getValue()));
 
                 TextView seekBarValue = (TextView) findViewById(R.id.seek_bar_value);
                 seekBarValue.setText(Integer.toString(progress));
@@ -331,6 +157,16 @@ public class FilterMakingActivity extends AppCompatActivity implements GLSurface
     }
 
     private void inflateEffects() {
+        imgPreview.setImageBitmap(BitmapProcessing.applyEffects(origBitmap,
+                FilterEffect.BRIGHTNESS.getValue(),
+                FilterEffect.CONTRAST.getValue(),
+                FilterEffect.SATURATION.getValue(),
+                FilterEffect.SHARPEN.getValue(),
+                FilterEffect.TEMPERATURE.getValue(),
+                FilterEffect.TINT.getValue(),
+                FilterEffect.VIGNETTE.getValue(),
+                FilterEffect.GRAIN.getValue()));
+
         // Find the parent container for bottom bar
         LinearLayout parent = (LinearLayout) findViewById(R.id.bottom_bar);
 
@@ -353,8 +189,8 @@ public class FilterMakingActivity extends AppCompatActivity implements GLSurface
         sharpen_button.setOnClickListener(this);
         ImageButton temperature_button = (ImageButton) findViewById(R.id.temperature_button);
         temperature_button.setOnClickListener(this);
-        ImageButton fade_button = (ImageButton) findViewById(R.id.fade_button);
-        fade_button.setOnClickListener(this);
+        ImageButton tint_button = (ImageButton) findViewById(R.id.tint_button);
+        tint_button.setOnClickListener(this);
         ImageButton vignette_button = (ImageButton) findViewById(R.id.vignette_button);
         vignette_button.setOnClickListener(this);
         ImageButton grain_button = (ImageButton) findViewById(R.id.grain_button);

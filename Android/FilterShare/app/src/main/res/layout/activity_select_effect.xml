@@ -52,7 +52,7 @@
             android:scaleType="fitCenter"
             style="?android:attr/borderlessButtonStyle"/>
         <ImageButton
-            android:id="@+id/fade_button"
+            android:id="@+id/tint_button"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_weight="1"

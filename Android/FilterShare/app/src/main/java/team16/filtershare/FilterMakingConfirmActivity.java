@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.Image;
 import android.media.effect.Effect;
 import android.media.effect.EffectContext;
 import android.media.effect.EffectFactory;
@@ -19,6 +20,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.ImageView;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -38,7 +40,7 @@ import okhttp3.Response;
 /**
  * Created by shinjaemin on 2016. 7. 6..
  */
-public class FilterMakingConfirmActivity extends AppCompatActivity implements GLSurfaceView.Renderer {
+public class FilterMakingConfirmActivity extends AppCompatActivity {
 
     int[] mTextures = new int[3];
     private EffectContext mEffectContext;
@@ -49,7 +51,7 @@ public class FilterMakingConfirmActivity extends AppCompatActivity implements GL
     int firstEffect = 0;
     private boolean mInitialized = false;
 
-    int brightness, contrast, saturation, sharpen, temperature, fade, vignette, grain;
+    int brightness, contrast, saturation, sharpen, temperature, tint, vignette, grain;
 
     Bitmap bitmap;
     OkHttpClient client;
@@ -70,23 +72,18 @@ public class FilterMakingConfirmActivity extends AppCompatActivity implements GL
         String picturepath = sfApp.get_picture_path();
         bitmap = BitmapFactory.decodeFile(picturepath);
 
-        GLSurfaceView mEffectView = (GLSurfaceView) findViewById(R.id.image_preview);
-        mEffectView.setEGLContextClientVersion(2);
-        mEffectView.setRenderer(this);
-        mEffectView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
-        Bitmap bitimg = BitmapFactory.decodeFile(picturepath);
+        ImageView imagePreview = (ImageView) findViewById(R.id.image_preview);
+        imagePreview.setImageBitmap(BitmapProcessing.applyEffects(bitmap,
+                FilterEffect.BRIGHTNESS.getValue(),
+                FilterEffect.CONTRAST.getValue(),
+                FilterEffect.SATURATION.getValue(),
+                FilterEffect.SHARPEN.getValue(),
+                FilterEffect.TEMPERATURE.getValue(),
+                FilterEffect.TINT.getValue(),
+                FilterEffect.VIGNETTE.getValue(),
+                FilterEffect.GRAIN.getValue()));
         android_id = Settings.Secure.getString(this.getContentResolver(), Settings.Secure.ANDROID_ID);
 
-        brightness = FilterEffect.BRIGHTNESS.getValue();
-        contrast = FilterEffect.CONTRAST.getValue();
-        saturation = FilterEffect.SATURATION.getValue();
-        sharpen = FilterEffect.SHARPEN.getValue();
-        temperature = FilterEffect.TEMPERATURE.getValue();
-        fade = FilterEffect.FADE.getValue();
-        vignette = FilterEffect.VIGNETTE.getValue();
-        grain = FilterEffect.GRAIN.getValue();
-
-        mEffectView.requestRender();
         final TextInputLayout filternameWrapper = (TextInputLayout) findViewById(R.id.filternameWrapper);
         final TextInputLayout usernameWrapper = (TextInputLayout) findViewById(R.id.usernameWrapper);
         final TextInputLayout tagsWrapper = (TextInputLayout) findViewById(R.id.tagsWrapper);
@@ -218,96 +215,5 @@ public class FilterMakingConfirmActivity extends AppCompatActivity implements GL
         protected JSONObject getres(){
             return res;
         }
-    }
-
-    @Override
-    public void onDrawFrame(GL10 gl) {
-        if (!mInitialized) {
-        //Only need to do this once
-            mEffectContext = EffectContext.createWithCurrentGlContext();
-            mTexRenderer.init();
-            loadTextures();
-            mInitialized = true;
-        }
-        initEffect(brightness, contrast, saturation, sharpen, temperature, fade, vignette, grain);
-        applyEffect();
-        renderResult();
-    }
-
-    @Override
-    public void onSurfaceChanged(GL10 gl, int width, int height) {
-        if (mTexRenderer != null) {
-            mTexRenderer.updateViewSize(width, height);
-        }
-    }
-    @Override
-    public void onSurfaceCreated(GL10 gl, EGLConfig config) {
-    }
-
-    public void loadTextures() {
-        // Generate textures
-        GLES20.glGenTextures(3, mTextures, 0);
-
-        // Store bitmap info and update texture size
-        mImageWidth = bitmap.getWidth();
-        mImageHeight = bitmap.getHeight();
-        mTexRenderer.updateTextureSize(mImageWidth, mImageHeight);
-
-        // Upload to texture
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mTextures[0]);
-        GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bitmap, 0);
-
-        // Set texture parameters
-        GLToolbox.initTexParams();
-    }
-
-    private void initEffect(int brightness, int contrast, int saturation, int sharpen, int temperature, int fade, int vignette, int grain) {
-        EffectFactory effectFactory = mEffectContext.getFactory();
-
-        mEffectArray[0] = effectFactory.createEffect(EffectFactory.EFFECT_BRIGHTNESS);
-        mEffectArray[0].setParameter("brightness", ((float) brightness / 100) + 1.0f);
-
-        mEffectArray[1] = effectFactory.createEffect(EffectFactory.EFFECT_CONTRAST);
-        mEffectArray[1].setParameter("contrast", ((float) contrast / 100) + 1.0f);
-
-        mEffectArray[2] = effectFactory.createEffect(
-                EffectFactory.EFFECT_SATURATE);
-        mEffectArray[2].setParameter("scale", (((float) saturation / 100) - 0.5f) * 2);
-
-        mEffectArray[3] = effectFactory.createEffect(
-                EffectFactory.EFFECT_SHARPEN);
-        mEffectArray[3].setParameter("scale", ((float) sharpen / 100));
-
-        mEffectArray[4] = effectFactory.createEffect(
-                EffectFactory.EFFECT_TEMPERATURE);
-        mEffectArray[4].setParameter("scale", ((float) temperature / 100));
-
-        mEffectArray[5] = effectFactory.createEffect(
-                EffectFactory.EFFECT_FILLLIGHT);
-        mEffectArray[5].setParameter("strength", (float) fade / 100);
-
-        mEffectArray[6] = effectFactory.createEffect(
-                EffectFactory.EFFECT_VIGNETTE);
-        mEffectArray[6].setParameter("scale", ((float) vignette / 100));
-
-        mEffectArray[7] = effectFactory.createEffect(
-                EffectFactory.EFFECT_GRAIN);
-        mEffectArray[7].setParameter("strength", ((float) grain / 100));
-    }
-
-    private void applyEffect() {
-        mEffectArray[firstEffect].apply(mTextures[0], mImageWidth, mImageHeight, mTextures[1]);
-        for (FilterEffect f : FilterEffect.values()) { // if more that one effect
-            Log.d("APPLY", f.getName());
-            int sourceTexture = mTextures[1];
-            int destinationTexture = mTextures[2];
-            mEffectArray[f.ordinal()].apply(sourceTexture, mImageWidth, mImageHeight, destinationTexture);
-            mTextures[1] = destinationTexture; // changing the textures array, so 1 is always the texture for output,
-            mTextures[2] = sourceTexture; // 2 is always the sparse texture
-        }
-    }
-
-    private void renderResult() {
-        mTexRenderer.renderTexture(mTextures[1]);
     }
 }
