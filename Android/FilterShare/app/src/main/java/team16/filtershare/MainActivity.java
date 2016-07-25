@@ -197,15 +197,20 @@ public class MainActivity extends Activity {
                 else {
                     try {
 
+
                         Bitmap realImage = BitmapFactory.decodeFile(filepath);
                         Log.d("filepath: ", filepath);
                         //Log.d("absolute", pictureFile.getAbsolutePath());
                         //Log.d("tostring", pictureFile.toString());
 
+
+
+                        realImage=rotate_image(filepath,realImage);
+                        Bitmap resizedImage;
+
                         int width = realImage.getWidth();
                         int height = realImage.getHeight();
                         Log.d("wh", "w: "+width+" h: "+  height);
-                        Bitmap resizedImage;
                         if(height>=width)
                              resizedImage= Bitmap.createBitmap(realImage, 0,height/2-width/2,width, width);
                         else
@@ -213,11 +218,12 @@ public class MainActivity extends Activity {
                         Log.d("wh after", "w: "+resizedImage.getWidth()+ " h: "+ resizedImage.getHeight());
                         //Bitmap resizedImage = Bitmap.createScaledBitmap(realImage, 200, 200, true);
 
-                        File pictureFile = getTmpOutputMediaFile(MEDIA_TYPE_IMAGE);
+                        File pictureFile = getTmpOutputMediaFile("latest_picture.jpg", MEDIA_TYPE_IMAGE);
                         if (pictureFile == null) {
                             Log.d("PictureCallback", "Error creating media file");
                             return;
                         }
+                        Log.d("Uri", Uri.fromFile(pictureFile).getPath());
 
                         FileOutputStream fos = new FileOutputStream(pictureFile, false);
                         resizedImage.compress(Bitmap.CompressFormat.JPEG, 100, fos);
@@ -225,6 +231,14 @@ public class MainActivity extends Activity {
 
                         GlobalVariables mApp = ((GlobalVariables)getApplicationContext());
                         mApp.set_picture_path(pictureFile.getAbsolutePath());
+
+
+                        //Scale the image into 300x300 jpeg file to improve speed in the filter editing page
+                        saveScaledImgFile(pictureFile);
+
+
+
+
 
 
                     } catch (FileNotFoundException e) {
@@ -408,10 +422,10 @@ public class MainActivity extends Activity {
         return mediaFile;
     }
 
-    private static File getTmpOutputMediaFile(int type){
+    private static File getTmpOutputMediaFile(String name_tail, int type){
         File mediaStorageFile;
         if (type == MEDIA_TYPE_IMAGE) {
-            mediaStorageFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "latest_picture.jpg");
+            mediaStorageFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), name_tail);
         }
         else{
             mediaStorageFile=null;
@@ -661,7 +675,7 @@ public class MainActivity extends Activity {
         @Override
         public void onPictureTaken(byte[] data, Camera camera) {
 
-            File pictureFile = getTmpOutputMediaFile(MEDIA_TYPE_IMAGE);
+            File pictureFile = getTmpOutputMediaFile("latest_picture.jpg", MEDIA_TYPE_IMAGE);
             if (pictureFile == null) {
                 Log.d("PictureCallback", "Error creating media file");
                 return;
@@ -685,7 +699,7 @@ public class MainActivity extends Activity {
                     Log.d("save", "front");
                     realImage = rotate(realImage, 90, true);
                 }
-                Uri.fromFile(pictureFile).getPath();
+
                 Log.d("Uri", Uri.fromFile(pictureFile).getPath());
                 realImage=rotate_image(Uri.fromFile(pictureFile).getPath(),realImage);
 
@@ -700,8 +714,12 @@ public class MainActivity extends Activity {
                 resizedImage.compress(Bitmap.CompressFormat.JPEG, 100, fos);
                 fos.close();
 
+
                 GlobalVariables mApp = ((GlobalVariables)getApplicationContext());
                 mApp.set_picture_path(pictureFile.getAbsolutePath());
+
+                //Scale the image into 300x300 jpeg file to improve speed in the filter editing page
+                saveScaledImgFile(pictureFile);
 
 
 
@@ -903,5 +921,32 @@ public class MainActivity extends Activity {
 
             });
         }
+    }
+    private File createScaledImgFile(String filepath, String new_path_tail, int new_width, int new_height){
+        Bitmap target_img = BitmapFactory.decodeFile(filepath);
+        Bitmap scaled_img = Bitmap.createScaledBitmap(target_img, new_width, new_height, true);
+        File new_picture_file = getTmpOutputMediaFile(new_path_tail, MEDIA_TYPE_IMAGE);
+        try {
+            FileOutputStream fos = new FileOutputStream(new_picture_file, false);
+            scaled_img.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+            fos.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return new_picture_file;
+
+
+    }
+
+    public void saveScaledImgFile(File original_file){
+        //Scale the image into 300x300 jpeg file to improve speed in the filter editing page
+        File scaledFile= createScaledImgFile(original_file.getAbsolutePath(), "scaled_picture.jpg", 300, 300);
+        Log.d("scaled_Uri", scaledFile.getAbsolutePath());
+        GlobalVariables mApp = ((GlobalVariables)getApplicationContext());
+        mApp.set_scaled_path(scaledFile.getAbsolutePath());
+
     }
 }
