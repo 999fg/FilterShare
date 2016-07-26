@@ -49,8 +49,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by shinjaemin on 2016. 7. 6..
+ * Created by harrykim on 2016. 7. 6..
  */
+
+//The part of the source is derived from official Android tutorial and answers in stackoverflow.
 public class MainActivity extends Activity {
 
     private Camera mCamera;
@@ -958,4 +960,18 @@ public class MainActivity extends Activity {
         mApp.set_scaled_path(scaledFile.getAbsolutePath());
 
     }
+
+    public static void saveEditedImage(Bitmap edited_bitmap){
+        File new_file = getOutputMediaFile(MEDIA_TYPE_IMAGE);
+        try {
+            FileOutputStream fos = new FileOutputStream(new_file, false);
+            edited_bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+            fos.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }
+
