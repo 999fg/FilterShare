@@ -1,25 +1,31 @@
 package team16.filtershare;
 
-import android.content.ClipData;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Point;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Button;
+import android.widget.RelativeLayout;
+
+import com.github.amlcurran.showcaseview.ShowcaseView;
+import com.github.amlcurran.showcaseview.targets.Target;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.ocpsoft.prettytime.PrettyTime;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -30,8 +36,6 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-
-import org.ocpsoft.prettytime.PrettyTime;
 
 public class ShareFilterActivity extends AppCompatActivity {
 
@@ -92,6 +96,9 @@ public class ShareFilterActivity extends AppCompatActivity {
             biggest = 45;
         else
             biggest = biggest + 5;
+
+        tutorial3();
+
     }
 
     @Override
@@ -144,6 +151,57 @@ public class ShareFilterActivity extends AppCompatActivity {
             e.printStackTrace();
         }
         return jsonObject;
+    }
+
+    private void tutorial3(){
+
+        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Display display = getWindowManager().getDefaultDisplay();
+        final Point screen_size = new Point();
+        display.getSize(screen_size);
+
+        Target homeTarget = new Target() {
+            @Override
+            public Point getPoint() {
+                // Get approximate position of home icon's center
+                int actionBarSize = toolbar.getHeight();
+                int x = screen_size.x - actionBarSize / 2;
+                int y = actionBarSize / 2;
+                return new Point(x, y);
+            }
+        };
+        //make tutorial for the page
+
+        SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
+        boolean didTutorial = sharedPref.getBoolean("didTutorial3", false);
+        //ActionItemTarget mAdd = new ActionItemTarget(this, R.id.filter_add);
+
+        if(!didTutorial) {
+            ShowcaseView mShowcaseView1 = new ShowcaseView.Builder(this)
+
+                    .setTarget(homeTarget)
+                    .setContentTitle("Go to page that can make your own filter ")
+                    .setContentText("This page shows all the shared fileters made by others. You can also share your own filter on this page by making one.")
+                    //.setStyle(R.style.CustomShowcaseTheme2)
+                    .blockAllTouches()
+                    .replaceEndButton(R.layout.scv_button)
+
+                    .build();
+
+
+            final RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+            layoutParams.addRule(RelativeLayout.CENTER_HORIZONTAL);
+            layoutParams.setMargins(0, screen_size.y * 6 / 10, 0, 0);
+
+            mShowcaseView1.setButtonPosition(layoutParams);
+            //mShowcaseView1.forceTextPosition(ShowcaseView.LEFT_OF_SHOWCASE);
+
+            sharedPref = this.getPreferences(Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPref.edit();
+            editor.putBoolean("didTutorial3", true);
+            editor.commit();
+
+        }
     }
 
     private class queryAsyncTask extends AsyncTask<String, Void, JSONObject> {

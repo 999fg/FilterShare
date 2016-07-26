@@ -26,11 +26,14 @@
         <activity android:name=".PhotoConfirmActivity"
             android:screenOrientation="portrait">
         </activity>
-        <activity android:name=".ShareFilterActivity">
+        <activity android:name=".ShareFilterActivity"
+            android:screenOrientation="portrait">
         </activity>
-        <activity android:name=".FilterMakingActivity">
+        <activity android:name=".FilterMakingActivity"
+            android:screenOrientation="portrait">
         </activity>
-        <activity android:name=".FilterMakingConfirmActivity">
+        <activity android:name=".FilterMakingConfirmActivity"
+            android:screenOrientation="portrait">
         </activity>
     </application>
 </manifest>

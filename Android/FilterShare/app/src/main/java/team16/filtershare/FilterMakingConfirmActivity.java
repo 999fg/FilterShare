@@ -2,28 +2,27 @@ package team16.filtershare;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.media.Image;
+import android.graphics.Point;
 import android.media.effect.Effect;
 import android.media.effect.EffectContext;
-import android.media.effect.EffectFactory;
-import android.opengl.GLES20;
-import android.opengl.GLSurfaceView;
-import android.opengl.GLUtils;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Display;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 
-import javax.microedition.khronos.egl.EGLConfig;
-import javax.microedition.khronos.opengles.GL10;
+import com.github.amlcurran.showcaseview.ShowcaseView;
+import com.github.amlcurran.showcaseview.targets.ViewTarget;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -135,6 +134,8 @@ public class FilterMakingConfirmActivity extends AppCompatActivity {
             }
         });
         */
+        
+        tutorial5();
     }
 
     private void hideKeyboard() {
@@ -185,6 +186,42 @@ public class FilterMakingConfirmActivity extends AppCompatActivity {
         return jsonObject;
     }
 
+    private void tutorial5(){
+        //make tutorial for the page
+        SharedPreferences sharedPref = FilterMakingConfirmActivity.this.getPreferences(Context.MODE_PRIVATE);
+        boolean didTutorial = sharedPref.getBoolean("didTutorial5", false);
+
+        Button mConfirm = (Button) findViewById(R.id.share_button);
+        if(!didTutorial) {
+            ShowcaseView mShowcaseView1 = new ShowcaseView.Builder(FilterMakingConfirmActivity.this)
+
+                    .setTarget(new ViewTarget(mConfirm))
+                    .setContentTitle("Share your filter")
+                    .setContentText("Write down informatioin about filter name, user name and hashtags. Then, touch the share button to share your own filter with others.")
+                    //.setStyle(R.style.CustomShowcaseTheme2)
+                    .blockAllTouches()
+                    .replaceEndButton(R.layout.scv_button)
+
+                    .build();
+
+            Display display = getWindowManager().getDefaultDisplay();
+            final Point screen_size = new Point();
+            display.getSize(screen_size);
+            final RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+            layoutParams.addRule(RelativeLayout.CENTER_HORIZONTAL);
+            layoutParams.setMargins(0, screen_size.y * 5 / 10, 0, 0);
+
+            mShowcaseView1.setButtonPosition(layoutParams);
+            //mShowcaseView1.forceTextPosition(ShowcaseView.LEFT_OF_SHOWCASE);
+
+            sharedPref = FilterMakingConfirmActivity.this.getPreferences(Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPref.edit();
+            editor.putBoolean("didTutorial5", true);
+            editor.commit();
+
+        }
+    }
+
     private class shareAsyncTask extends AsyncTask<String, Void, JSONObject> {
         JSONObject res = null;
         public shareAsyncTask() {
@@ -215,5 +252,8 @@ public class FilterMakingConfirmActivity extends AppCompatActivity {
         protected JSONObject getres(){
             return res;
         }
+
+
     }
+
 }
