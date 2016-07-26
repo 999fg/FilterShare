@@ -54,6 +54,9 @@ public class SFAdapter extends RecyclerView.Adapter<SFAdapter.ViewHolder> {
         int filter_likes = sfDataset.get(position).likes;
         String filter_hashtags = "";
         String[] hashtags = sfDataset.get(position).hashtags;
+        Log.d("IMAGE SIZE", String.valueOf(sfDataset.get(position).imgbit.getWidth()));
+        Log.d("IMAGE SIZE", String.valueOf(sfDataset.get(position).imgbit.getHeight()));
+
         holder.imageView.setImageBitmap(BitmapProcessing.applyEffects(sfDataset.get(position).imgbit,
                 sfDataset.get(position).brightness,
                 sfDataset.get(position).contrast,
