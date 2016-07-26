@@ -15,8 +15,6 @@ import android.graphics.RadialGradient;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Shader;
-import android.support.annotation.VisibleForTesting;
-import android.util.Log;
 
 public class BitmapProcessing {
 
@@ -59,7 +57,6 @@ public class BitmapProcessing {
     }
 
     // [-255, +255] -> Default = 0
-    @VisibleForTesting
     public static int brightness(int pixel, int value) {
         // get pixel color
         int A = pixel & 0xff000000;
