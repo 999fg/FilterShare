@@ -69,7 +69,7 @@ public class FilterMakingConfirmActivity extends AppCompatActivity {
         }
 
         GlobalVariables sfApp = ((GlobalVariables)getApplicationContext());
-        String picturepath = sfApp.get_picture_path();
+        String picturepath = sfApp.get_scaled_path();
         bitmap = BitmapFactory.decodeFile(picturepath);
 
         ImageView imagePreview = (ImageView) findViewById(R.id.image_preview);

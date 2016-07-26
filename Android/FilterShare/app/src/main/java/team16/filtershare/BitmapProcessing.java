@@ -19,35 +19,15 @@ import android.graphics.Shader;
 public class BitmapProcessing {
 
     public static Bitmap applyEffects(Bitmap origBitmap, int brightness, int contrast, int saturation, int sharpen, int temperature, int tint, int vignette, int grain) {
-
-        int width = origBitmap.getWidth();
-        int height = origBitmap.getHeight();
-
-        // Bitmap bmOut = Bitmap.createBitmap(width, height, origBitmap.getConfig());
-
-        int[] pix = new int[width * height];
-        origBitmap.getPixels(pix, 0, width, 0, 0, width, height);
-
-
-        // int A, R, G, B;
-
-        for(int x = 0; x < width; ++x) {
-            for (int y = 0; y < height; ++y) {
-                int index = y * width + x;
-                int pixel = pix[index];
-                pixel = BitmapProcessing.brightness(pixel, brightness);
-                pixel = BitmapProcessing.contrast(pixel, contrast);
-                pixel = BitmapProcessing.temperature(pixel, temperature);
-                pixel = BitmapProcessing.tint(pixel, tint);
-                pix[index] = BitmapProcessing.grain(pixel, grain);
-            }
-        }
-        Bitmap bitmap = Bitmap.createBitmap(width, height,origBitmap.getConfig());
-        bitmap.setPixels(pix, 0, width, 0, 0, width, height);
-
+        Bitmap bitmap = origBitmap;
+        bitmap = BitmapProcessing.brightness(bitmap, brightness);
+        bitmap = BitmapProcessing.contrast(bitmap, contrast);
         bitmap = BitmapProcessing.saturation(bitmap, saturation);
         bitmap = BitmapProcessing.sharpen(bitmap,sharpen);
+        bitmap = BitmapProcessing.temperature(bitmap, temperature);
+        bitmap = BitmapProcessing.tint(bitmap, tint);
         bitmap = BitmapProcessing.vignette(bitmap, vignette);
+        bitmap = BitmapProcessing.grain(bitmap, grain);
         return bitmap;
     }
 
@@ -69,59 +49,104 @@ public class BitmapProcessing {
     }
 
     // [-255, +255] -> Default = 0
-    public static int brightness(int pixel, int value) {
+    public static Bitmap brightness(Bitmap origBitmap, int value) {
+        int width = origBitmap.getWidth();
+        int height = origBitmap.getHeight();
+
+        int[] pix = new int[width * height];
+        origBitmap.getPixels(pix, 0, width, 0, 0, width, height);
+
         int A, R, G, B;
         // get pixel color
-        A = Color.alpha(pixel);
-        R = Color.red(pixel);
-        G = Color.green(pixel);
-        B = Color.blue(pixel);
+        for(int x = 0; x < width; ++x) {
+            for (int y = 0; y < height; ++y) {
+                int index = y * width + x;
+                int pixel = pix[index];
 
-        // increase/decrease each channel
-        R += value;
-        if(R > 255) { R = 255; }
-        else if(R < 0) { R = 0; }
+                A = Color.alpha(pixel);
+                R = Color.red(pixel);
+                G = Color.green(pixel);
+                B = Color.blue(pixel);
 
-        G += value;
-        if(G > 255) { G = 255; }
-        else if(G < 0) { G = 0; }
+                // increase/decrease each channel
+                R += value;
+                if (R > 255) {
+                    R = 255;
+                } else if (R < 0) {
+                    R = 0;
+                }
 
-        B += value;
-        if(B > 255) { B = 255; }
-        else if(B < 0) { B = 0; }
+                G += value;
+                if (G > 255) {
+                    G = 255;
+                } else if (G < 0) {
+                    G = 0;
+                }
 
-        pixel = Color.argb(A, R, G, B);
-        return pixel;
+                B += value;
+                if (B > 255) {
+                    B = 255;
+                } else if (B < 0) {
+                    B = 0;
+                }
+
+                pix[index] = Color.argb(A, R, G, B);
+            }
+        }
+        Bitmap bitmap = Bitmap.createBitmap(width, height,origBitmap.getConfig());
+        bitmap.setPixels(pix, 0, width, 0, 0, width, height);
+        return bitmap;
     }
 
     // [-100, +100] -> Default = 0
-    public static int contrast(int pixel, double value) {
+    public static Bitmap contrast(Bitmap origBitmap, double value) {
+        int width = origBitmap.getWidth();
+        int height = origBitmap.getHeight();
 
-        // color information
+        int[] pix = new int[width * height];
+        origBitmap.getPixels(pix, 0, width, 0, 0, width, height);
+
         int A, R, G, B;
+        // get pixel color
+        for(int x = 0; x < width; ++x) {
+            for (int y = 0; y < height; ++y) {
+                int index = y * width + x;
+                int pixel = pix[index];
+                // get contrast value
+                double contrast = Math.pow((100 + value) / 100, 2);
 
-        // get contrast value
-        double contrast = Math.pow((100 + value) / 100, 2);
+                A = Color.alpha(pixel);
+                // apply filter contrast for every channel R, G, B
+                R = Color.red(pixel);
+                R = (int) (((((R / 255.0) - 0.5) * contrast) + 0.5) * 255.0);
+                if (R < 0) {
+                    R = 0;
+                } else if (R > 255) {
+                    R = 255;
+                }
 
-        A = Color.alpha(pixel);
-        // apply filter contrast for every channel R, G, B
-        R = Color.red(pixel);
-        R = (int)(((((R / 255.0) - 0.5) * contrast) + 0.5) * 255.0);
-        if(R < 0) { R = 0; }
-        else if(R > 255) { R = 255; }
+                G = Color.green(pixel);
+                G = (int) (((((G / 255.0) - 0.5) * contrast) + 0.5) * 255.0);
+                if (G < 0) {
+                    G = 0;
+                } else if (G > 255) {
+                    G = 255;
+                }
 
-        G = Color.green(pixel);
-        G = (int)(((((G / 255.0) - 0.5) * contrast) + 0.5) * 255.0);
-        if(G < 0) { G = 0; }
-        else if(G > 255) { G = 255; }
+                B = Color.blue(pixel);
+                B = (int) (((((B / 255.0) - 0.5) * contrast) + 0.5) * 255.0);
+                if (B < 0) {
+                    B = 0;
+                } else if (B > 255) {
+                    B = 255;
+                }
 
-        B = Color.blue(pixel);
-        B = (int)(((((B / 255.0) - 0.5) * contrast) + 0.5) * 255.0);
-        if(B < 0) { B = 0; }
-        else if(B > 255) { B = 255; }
-
-        pixel = Color.argb(A, R, G, B);
-        return pixel;
+                pix[index] = Color.argb(A, R, G, B);
+            }
+        }
+        Bitmap bitmap = Bitmap.createBitmap(width, height,origBitmap.getConfig());
+        bitmap.setPixels(pix, 0, width, 0, 0, width, height);
+        return bitmap;
     }
 
     // [0, 200] -> Default = 100
@@ -160,33 +185,56 @@ public class BitmapProcessing {
 		return ConvolutionMatrix.computeConvolution3x3(src, convMatrix);
 	}
 
-    public static int temperature(int pixel, int value) {
-        // color information
+    public static Bitmap temperature(Bitmap origBitmap, int value) {
+        int width = origBitmap.getWidth();
+        int height = origBitmap.getHeight();
+
+        int[] pix = new int[width * height];
+        origBitmap.getPixels(pix, 0, width, 0, 0, width, height);
+
         int A, R, G, B;
+        // get pixel color
+        for(int x = 0; x < width; ++x) {
+            for (int y = 0; y < height; ++y) {
+                int index = y * width + x;
+                int pixel = pix[index];
 
-        A = Color.alpha(pixel);
-        R = Color.red(pixel);
-        G = Color.green(pixel);
-        B = Color.blue(pixel);
+                A = Color.alpha(pixel);
+                R = Color.red(pixel);
+                G = Color.green(pixel);
+                B = Color.blue(pixel);
 
-        // increase/decrease each channel
-        R = R + (value - 50);
-        if(R > 255) { R = 255; }
-        else if(R < 0) { R = 0; }
+                // increase/decrease each channel
+                R = R + (value - 50);
+                if (R > 255) {
+                    R = 255;
+                } else if (R < 0) {
+                    R = 0;
+                }
 
-        G = G - ((value - 50) / 2);
-        if(G > 255) { G = 255; }
-        else if(G < 0) { G = 0; }
+                G = G - ((value - 50) / 2);
+                if (G > 255) {
+                    G = 255;
+                } else if (G < 0) {
+                    G = 0;
+                }
 
-        B = B - (value - 50);
-        if(B > 255) { B = 255; }
-        else if(B < 0) { B = 0; }
+                B = B - (value - 50);
+                if (B > 255) {
+                    B = 255;
+                } else if (B < 0) {
+                    B = 0;
+                }
 
-        pixel = Color.argb(A, R, G, B);
-        return pixel;
+                pix[index] = Color.argb(A, R, G, B);
+            }
+        }
+        Bitmap bitmap = Bitmap.createBitmap(width, height,origBitmap.getConfig());
+        bitmap.setPixels(pix, 0, width, 0, 0, width, height);
+        return bitmap;
     }
 
-    public static int tint(int pixel, int degree) {
+    public static Bitmap tint(Bitmap origBitmap, int degree) {
         double PI = 3.14159d;
         double FULL_CIRCLE_DEGREE = 360d;
         double HALF_CIRCLE_DEGREE = 180d;
@@ -198,25 +246,39 @@ public class BitmapProcessing {
         int S = (int)(RANGE * Math.sin(angle));
         int C = (int)(RANGE * Math.cos(angle));
 
-        int r = ( pixel >> 16 ) & 0xff;
-        int g = ( pixel >> 8 ) & 0xff;
-        int b = pixel & 0xff;
-        RY = ( 70 * r - 59 * g - 11 * b ) / 100;
-        GY = (-30 * r + 41 * g - 11 * b ) / 100;
-        BY = (-30 * r - 59 * g + 89 * b ) / 100;
-        Y  = ( 30 * r + 59 * g + 11 * b ) / 100;
-        RYY = ( S * BY + C * RY ) / 256;
-        BYY = ( C * BY - S * RY ) / 256;
-        GYY = (-51 * RYY - 19 * BYY ) / 100;
-        R = Y + RYY;
-        R = ( R < 0 ) ? 0 : (( R > 255 ) ? 255 : R );
-        G = Y + GYY;
-        G = ( G < 0 ) ? 0 : (( G > 255 ) ? 255 : G );
-        B = Y + BYY;
-        B = ( B < 0 ) ? 0 : (( B > 255 ) ? 255 : B );
-        pixel = 0xff000000 | (R << 16) | (G << 8 ) | B;
+        int width = origBitmap.getWidth();
+        int height = origBitmap.getHeight();
 
-        return pixel;
+        int[] pix = new int[width * height];
+        origBitmap.getPixels(pix, 0, width, 0, 0, width, height);
+
+        // get pixel color
+        for(int x = 0; x < width; ++x) {
+            for (int y = 0; y < height; ++y) {
+                int index = y * width + x;
+                int pixel = pix[index];
+                int r = (pixel >> 16) & 0xff;
+                int g = (pixel >> 8) & 0xff;
+                int b = pixel & 0xff;
+                RY = (70 * r - 59 * g - 11 * b) / 100;
+                GY = (-30 * r + 41 * g - 11 * b) / 100;
+                BY = (-30 * r - 59 * g + 89 * b) / 100;
+                Y = (30 * r + 59 * g + 11 * b) / 100;
+                RYY = (S * BY + C * RY) / 256;
+                BYY = (C * BY - S * RY) / 256;
+                GYY = (-51 * RYY - 19 * BYY) / 100;
+                R = Y + RYY;
+                R = (R < 0) ? 0 : ((R > 255) ? 255 : R);
+                G = Y + GYY;
+                G = (G < 0) ? 0 : ((G > 255) ? 255 : G);
+                B = Y + BYY;
+                B = (B < 0) ? 0 : ((B > 255) ? 255 : B);
+                pix[index] = 0xff000000 | (R << 16) | (G << 8) | B;
+            }
+        }
+        Bitmap bitmap = Bitmap.createBitmap(width, height,origBitmap.getConfig());
+        bitmap.setPixels(pix, 0, width, 0, 0, width, height);
+        return bitmap;
     }
 
     public static Bitmap vignette(Bitmap image, int value) {
@@ -250,22 +312,34 @@ public class BitmapProcessing {
         return image;
     }
 
-	public static int grain(int pixel, int scale) {
+	public static Bitmap grain(Bitmap origBitmap, int scale) {
 		final int COLOR_MAX = 0xFF;
 		// a random object
 		Random random = new Random();
 
 		int index = 0;
+        int width = origBitmap.getWidth();
+        int height = origBitmap.getHeight();
 
-        int color = pixel;
-        int red = (int)(constrain(Color.red(color) + scale * (2*Math.random() - 1), 0, 255));
-        int green = (int)(constrain(Color.green(color) + scale * (2*Math.random() - 1), 0, 255));
-        int blue = (int)(constrain(Color.blue(color) + scale * (2*Math.random() - 1), 0, 255));
-        // Put new color
-        int randColor = Color.rgb(red, green, blue);
+        int[] pix = new int[width * height];
+        origBitmap.getPixels(pix, 0, width, 0, 0, width, height);
 
-        pixel |= randColor;
+        // get pixel color
+        for(int x = 0; x < width; ++x) {
+            for (int y = 0; y < height; ++y) {
+                index = y * width + x;
+                int color = pix[index];
+                int red = (int) (constrain(Color.red(color) + scale * (2 * Math.random() - 1), 0, 255));
+                int green = (int) (constrain(Color.green(color) + scale * (2 * Math.random() - 1), 0, 255));
+                int blue = (int) (constrain(Color.blue(color) + scale * (2 * Math.random() - 1), 0, 255));
+                // Put new color
+                int randColor = Color.rgb(red, green, blue);
 
-        return pixel;
+                pix[index] |= randColor;
+            }
+        }
+        Bitmap bitmap = Bitmap.createBitmap(width, height,origBitmap.getConfig());
+        bitmap.setPixels(pix, 0, width, 0, 0, width, height);
+        return bitmap;
 	}
 }

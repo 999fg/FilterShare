@@ -46,7 +46,7 @@ public class FilterMakingActivity extends AppCompatActivity implements View.OnCl
         imgPreview = (ImageView) findViewById(R.id.imgPreview);
 
         GlobalVariables sfApp = ((GlobalVariables)getApplicationContext());
-        String picturepath = sfApp.get_picture_path();
+        String picturepath = sfApp.get_scaled_path();
         origBitmap = BitmapFactory.decodeFile(picturepath);
         imgPreview.setImageBitmap(origBitmap);
 

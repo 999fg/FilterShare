@@ -63,7 +63,7 @@ public class ShareFilterActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(layoutManager);
 
         GlobalVariables sfApp = ((GlobalVariables)getApplicationContext());
-        String picturepath = sfApp.get_picture_path();
+        String picturepath = sfApp.get_scaled_path();
         final Bitmap bitimg = BitmapFactory.decodeFile(picturepath);
 
         sfDataset = new ArrayList<>();
