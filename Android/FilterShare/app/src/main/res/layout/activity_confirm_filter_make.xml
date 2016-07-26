@@ -78,14 +78,16 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="Back"
-                android:theme="@style/MyButton"/>
+                android:theme="@style/MyButton"
+                style="?android:attr/borderlessButtonStyle" />
             <Button
                 android:id="@+id/share_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="Share"
-                android:theme="@style/MyButton"/>
+                android:theme="@style/MyButton"
+                style="?android:attr/borderlessButtonStyle" />
         </LinearLayout>
     </LinearLayout>
 </ScrollView>

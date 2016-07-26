@@ -4,10 +4,10 @@ package team16.filtershare;
  * Created by chocho on 7/18/16.
  */
 public enum FilterEffect {
-    BRIGHTNESS ("brightness", 0),
-    CONTRAST ("contrast", 0),
+    BRIGHTNESS ("brightness", 50),
+    CONTRAST ("contrast", 50),
     SATURATION ("saturation", 50),
-    SHARPEN ("sharpen", 0),
+    FADE ("fade", 0),
     TEMPERATURE ("temperature", 50),
     TINT ("tint", 0),
     VIGNETTE ("vignette", 0),
