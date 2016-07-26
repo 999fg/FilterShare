@@ -399,7 +399,7 @@ public class MainActivity extends Activity {
         // using Environment.getExternalStorageState() before doing this.
 
         File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_PICTURES), "MyCameraApp");
+                Environment.DIRECTORY_PICTURES), "FilterShare");
         // This location works best if you want the created images to be shared
         // between applications and persist after your app has been uninstalled.
 
@@ -834,101 +834,7 @@ public class MainActivity extends Activity {
         );
 
 
-        ImageButton mCapture = (ImageButton) findViewById(R.id.button_capture);
-
-        SharedPreferences sharedPref = MainActivity.this.getPreferences(Context.MODE_PRIVATE);
-        boolean didTutorial = sharedPref.getBoolean("didTutorial", false);
-
-
-
-        if(!didTutorial) {
-            ShowcaseView mShowcaseView1 = new ShowcaseView.Builder(this)
-
-                    .setTarget(new ViewTarget(mCapture))
-                    .setContentTitle("Select a picture by taking a photo")
-                    .setContentText("Take your own photo to apply FilterShare filters. ")
-                    //.setStyle(R.style.CustomShowcaseTheme2)
-                    .blockAllTouches()
-                    .replaceEndButton(R.layout.scv_button)
-
-                    .build();
-
-            final RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-            layoutParams.addRule(RelativeLayout.CENTER_HORIZONTAL);
-            layoutParams.setMargins(0, screen_size.y * 3 / 10, 0, 0);
-
-            mShowcaseView1.setButtonPosition(layoutParams);
-            //mShowcaseView1.forceTextPosition(ShowcaseView.LEFT_OF_SHOWCASE);
-
-            mShowcaseView1.setOnShowcaseEventListener(new OnShowcaseEventListener() {
-                @Override
-                public void onShowcaseViewHide(ShowcaseView showcaseView) {
-                    ImageButton mButton_gallery = (ImageButton) findViewById(R.id.button_gallery);
-
-                    ShowcaseView mShowcaseView2 = new ShowcaseView.Builder(MainActivity.this)
-
-                            .setTarget(new ViewTarget(mButton_gallery))
-                            .setContentTitle("Select a picture by picking up from gallery")
-                            .setContentText("Pick up the existing picture from gallery to apply FilterShare filters.")
-                            //.setStyle(R.style.CustomShowcaseTheme2)
-                            .blockAllTouches()
-
-                            .replaceEndButton(R.layout.scv_button)
-
-                            .build();
-                    mShowcaseView2.setButtonPosition(layoutParams);
-
-                    SharedPreferences sharedPref = MainActivity.this.getPreferences(Context.MODE_PRIVATE);
-                    SharedPreferences.Editor editor = sharedPref.edit();
-                    editor.putBoolean("didTutorial", true);
-                    editor.commit();
-
-
-                }
-
-                @Override
-                public void onShowcaseViewDidHide(ShowcaseView showcaseView) {
-
-
-                }
-
-                @Override
-                public void onShowcaseViewShow(ShowcaseView showcaseView) {
-
-                }
-
-                @Override
-                public void onShowcaseViewTouchBlocked(MotionEvent motionEvent) {
-
-                }
-
-                ;
-
-
-                OnShowcaseEventListener NONE = new OnShowcaseEventListener() {
-                    @Override
-                    public void onShowcaseViewHide(ShowcaseView showcaseView) {
-
-                    }
-
-                    @Override
-                    public void onShowcaseViewDidHide(ShowcaseView showcaseView) {
-
-                    }
-
-                    @Override
-                    public void onShowcaseViewShow(ShowcaseView showcaseView) {
-
-                    }
-
-                    @Override
-                    public void onShowcaseViewTouchBlocked(MotionEvent motionEvent) {
-
-                    }
-                };
-
-            });
-        }
+        tutorial1();
     }
     private File createScaledImgFile(String filepath, String new_path_tail, int new_width, int new_height){
         Bitmap target_img = BitmapFactory.decodeFile(filepath);
@@ -971,5 +877,82 @@ public class MainActivity extends Activity {
             e.printStackTrace();
         }
     }
+
+    private void tutorial1(){
+        ImageButton mCapture = (ImageButton) findViewById(R.id.button_capture);
+
+
+        //make tutorial for the page
+        SharedPreferences sharedPref = MainActivity.this.getPreferences(Context.MODE_PRIVATE);
+        boolean didTutorial = sharedPref.getBoolean("didTutorial", false);
+
+        if(!didTutorial) {
+            ShowcaseView mShowcaseView1 = new ShowcaseView.Builder(this)
+
+                    .setTarget(new ViewTarget(mCapture))
+                    .setContentTitle("Select a picture by taking a photo")
+                    .setContentText("Take your own photo to apply FilterShare filters. ")
+                    //.setStyle(R.style.CustomShowcaseTheme2)
+                    .blockAllTouches()
+                    .replaceEndButton(R.layout.scv_button)
+
+                    .build();
+
+            sharedPref = this.getPreferences(Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPref.edit();
+            editor.putBoolean("didTutorial", true);
+            editor.commit();
+
+            Display display = getWindowManager().getDefaultDisplay();
+            final Point screen_size = new Point();
+            display.getSize(screen_size);
+
+            final RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+            layoutParams.addRule(RelativeLayout.CENTER_HORIZONTAL);
+            layoutParams.setMargins(0, screen_size.y * 4 / 11, 0, 0);
+
+            mShowcaseView1.setButtonPosition(layoutParams);
+            //mShowcaseView1.forceTextPosition(ShowcaseView.LEFT_OF_SHOWCASE);
+
+            mShowcaseView1.setOnShowcaseEventListener(new OnShowcaseEventListener() {
+                @Override
+                public void onShowcaseViewHide(ShowcaseView showcaseView) {
+                    ImageButton mButton_gallery = (ImageButton) findViewById(R.id.button_gallery);
+
+                    ShowcaseView mShowcaseView2 = new ShowcaseView.Builder(MainActivity.this)
+
+                            .setTarget(new ViewTarget(mButton_gallery))
+                            .setContentTitle("Select a picture by picking up from gallery")
+                            .setContentText("Pick up the existing picture from gallery to apply FilterShare filters.")
+                            //.setStyle(R.style.CustomShowcaseTheme2)
+                            .blockAllTouches()
+
+                            .replaceEndButton(R.layout.scv_button)
+
+                            .build();
+                    mShowcaseView2.setButtonPosition(layoutParams);
+
+
+
+
+                }
+
+                @Override
+                public void onShowcaseViewDidHide(ShowcaseView showcaseView) {
+                }
+
+                @Override
+                public void onShowcaseViewShow(ShowcaseView showcaseView) {
+                }
+
+                @Override
+                public void onShowcaseViewTouchBlocked(MotionEvent motionEvent) {
+
+                };
+
+            });
+        }
+    }
+
 }
 

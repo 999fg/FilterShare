@@ -39,4 +39,5 @@ public class GlobalVariables extends Application {
         scaled_picture_path = new_path;
     }
 
+
 }

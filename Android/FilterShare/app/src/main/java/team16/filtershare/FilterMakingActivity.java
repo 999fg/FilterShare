@@ -1,19 +1,29 @@
 package team16.filtershare;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Display;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
+
+import com.github.amlcurran.showcaseview.OnShowcaseEventListener;
+import com.github.amlcurran.showcaseview.ShowcaseView;
+import com.github.amlcurran.showcaseview.targets.ViewTarget;
 
 /**
  * Created by shinjaemin on 2016. 7. 6..
@@ -41,6 +51,8 @@ public class FilterMakingActivity extends AppCompatActivity implements View.OnCl
         imgPreview.setImageBitmap(origBitmap);
 
         inflateEffects();
+
+        tutorial4();
     }
 
     public void onClick(View v) {
@@ -205,6 +217,8 @@ public class FilterMakingActivity extends AppCompatActivity implements View.OnCl
                 startActivity(intent);
             }
         });
+
+
     }
 
     void initializeFilterEffects() {
@@ -216,6 +230,76 @@ public class FilterMakingActivity extends AppCompatActivity implements View.OnCl
         FilterEffect.TINT.setValue(0);
         FilterEffect.VIGNETTE.setValue(0);
         FilterEffect.GRAIN.setValue(0);
+    }
+
+    private void tutorial4(){
+        ImageButton mBrightness = (ImageButton) findViewById(R.id.brightness_button);
+        //make tutorial for the page
+        SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
+        boolean didTutorial = sharedPref.getBoolean("didTutorial4", false);
+
+        if(!didTutorial) {
+            ShowcaseView mShowcaseView1 = new ShowcaseView.Builder(this)
+
+                    .setTarget(new ViewTarget(mBrightness))
+                    .setContentTitle("Edit the filter property you want to modify")
+                    .setContentText("There are 8 filter properties that you can modify and combine to make your own filter. Touch the icon and edit the filter")
+                    //.setStyle(R.style.CustomShowcaseTheme2)
+                    .blockAllTouches()
+                    .replaceEndButton(R.layout.scv_button)
+
+                    .build();
+
+            Display display = getWindowManager().getDefaultDisplay();
+            final Point screen_size = new Point();
+            display.getSize(screen_size);
+            final RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+            layoutParams.addRule(RelativeLayout.CENTER_HORIZONTAL);
+            layoutParams.setMargins(0, screen_size.y * 4 / 11, 0, 0);
+
+            mShowcaseView1.setButtonPosition(layoutParams);
+            //mShowcaseView1.forceTextPosition(ShowcaseView.LEFT_OF_SHOWCASE);
+
+            mShowcaseView1.setOnShowcaseEventListener(new OnShowcaseEventListener() {
+                @Override
+                public void onShowcaseViewHide(ShowcaseView showcaseView) {
+                    Button mNext = (Button) findViewById(R.id.next_button);
+
+                    ShowcaseView mShowcaseView2 = new ShowcaseView.Builder(FilterMakingActivity.this)
+
+                            .setTarget(new ViewTarget(mNext))
+                            .setContentTitle("Confirm your filter")
+                            .setContentText("If you are satisfied with your own filter, touch the next button to upload your own filter")
+                            //.setStyle(R.style.CustomShowcaseTheme2)
+                            .blockAllTouches()
+
+                            .replaceEndButton(R.layout.scv_button)
+
+                            .build();
+                    mShowcaseView2.setButtonPosition(layoutParams);
+
+                    SharedPreferences sharedPref = FilterMakingActivity.this.getPreferences(Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedPref.edit();
+                    editor.putBoolean("didTutorial4", true);
+                    editor.commit();
+
+                }
+
+                @Override
+                public void onShowcaseViewDidHide(ShowcaseView showcaseView) {
+                }
+
+                @Override
+                public void onShowcaseViewShow(ShowcaseView showcaseView) {
+                }
+
+                @Override
+                public void onShowcaseViewTouchBlocked(MotionEvent motionEvent) {
+
+                };
+
+            });
+        }
     }
 }
 
