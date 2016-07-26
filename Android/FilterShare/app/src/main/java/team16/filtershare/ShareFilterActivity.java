@@ -67,7 +67,7 @@ public class ShareFilterActivity extends AppCompatActivity {
         final Bitmap bitimg = BitmapFactory.decodeFile(picturepath);
 
         sfDataset = new ArrayList<>();
-        adapter = new SFAdapter(sfDataset);
+        adapter = new SFAdapter(sfDataset, this, client, android_id);
         recyclerView.setAdapter(adapter);
         biggest = 0; //TODO: filter_biggest API to be implemented
 
@@ -199,7 +199,7 @@ public class ShareFilterActivity extends AppCompatActivity {
                 sfDataset.add(new SFData(
                         bitimg,
                         jo.optString("name"),
-                        22803,
+                        jo.optInt("use_count"),
                         tags,
                         jo.optString("username") + ", " + p.format(new Date(Long.parseLong(jo.optString("date_created")))),
                         jo.optInt("brightness"),
@@ -209,7 +209,8 @@ public class ShareFilterActivity extends AppCompatActivity {
                         jo.optInt("temperature"),
                         jo.optInt("tint"),
                         jo.optInt("vignette"),
-                        jo.optInt("grain")
+                        jo.optInt("grain"),
+                        jo.optInt("filter_id")
                 ));
             }
             adapter.notifyItemInserted(0);
