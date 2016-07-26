@@ -53,6 +53,7 @@ public class FilterMakingConfirmActivity extends AppCompatActivity {
     int brightness, contrast, saturation, fade, temperature, tint, vignette, grain;
 
     Bitmap bitmap;
+    Bitmap realbitmap;
     OkHttpClient client;
     String android_id;
 
@@ -70,6 +71,7 @@ public class FilterMakingConfirmActivity extends AppCompatActivity {
         GlobalVariables sfApp = ((GlobalVariables)getApplicationContext());
         String picturepath = sfApp.get_scaled_path();
         bitmap = BitmapFactory.decodeFile(picturepath);
+        realbitmap = BitmapFactory.decodeFile(sfApp.get_picture_path());
 
         ImageView imagePreview = (ImageView) findViewById(R.id.image_preview);
         imagePreview.setImageBitmap(BitmapProcessing.applyEffects(bitmap,
@@ -106,6 +108,16 @@ public class FilterMakingConfirmActivity extends AppCompatActivity {
                     tagsWrapper.setErrorEnabled(false);
                     shareAsyncTask SAT = new shareAsyncTask();
                     SAT.execute(name, username, tags);
+                    MainActivity.saveEditedImage(BitmapProcessing.applyEffects(
+                            realbitmap,
+                            FilterEffect.BRIGHTNESS.getValue(),
+                            FilterEffect.CONTRAST.getValue(),
+                            FilterEffect.SATURATION.getValue(),
+                            FilterEffect.FADE.getValue(),
+                            FilterEffect.TEMPERATURE.getValue(),
+                            FilterEffect.TINT.getValue(),
+                            FilterEffect.VIGNETTE.getValue(),
+                            FilterEffect.GRAIN.getValue()));
                     Intent intent = new Intent(FilterMakingConfirmActivity.this, ShareFilterActivity.class);
                     startActivity(intent);
                 }

@@ -6,7 +6,7 @@
     <android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/card_view"
         android:layout_width="match_parent"
-        android:layout_height="400dp"
+        android:layout_height="420dp"
         android:layout_margin="8dp">
 
         <RelativeLayout
@@ -16,7 +16,7 @@
             <ImageView
                 android:id="@+id/test_image"
                 android:layout_width="match_parent"
-                android:layout_height="315dp"
+                android:layout_height="335dp"
                 android:layout_alignParentTop="true"
                 android:scaleType="centerCrop"/>
 
