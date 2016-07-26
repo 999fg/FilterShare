@@ -103,6 +103,8 @@ public class SFAdapter extends RecyclerView.Adapter<SFAdapter.ViewHolder> {
             holder.filterLikes.setText(Double.parseDouble(String.format("%.2f",(double) filter_likes / 1000000)) + "M times used");
         else if (filter_likes > 999)
             holder.filterLikes.setText(Double.parseDouble(String.format("%.2f",(double) filter_likes / 1000)) + "k times used");
+        else if (filter_likes <= 1)
+            holder.filterLikes.setText(filter_likes + " time used");
         else
             holder.filterLikes.setText(filter_likes + " times used");
         for(int i = 0; i < hashtags.length; i++)
