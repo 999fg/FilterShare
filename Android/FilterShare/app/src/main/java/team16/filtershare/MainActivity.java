@@ -232,6 +232,9 @@ public class MainActivity extends Activity {
                         GlobalVariables mApp = ((GlobalVariables)getApplicationContext());
                         mApp.set_picture_path(pictureFile.getAbsolutePath());
 
+                        realImage.recycle();
+                        resizedImage.recycle();
+
 
                         //Scale the image into 300x300 jpeg file to improve speed in the filter editing page
                         saveScaledImgFile(pictureFile);
@@ -718,6 +721,9 @@ public class MainActivity extends Activity {
                 GlobalVariables mApp = ((GlobalVariables)getApplicationContext());
                 mApp.set_picture_path(pictureFile.getAbsolutePath());
 
+                realImage.recycle();
+                resizedImage.recycle();
+
                 //Scale the image into 300x300 jpeg file to improve speed in the filter editing page
                 saveScaledImgFile(pictureFile);
 
@@ -935,6 +941,9 @@ public class MainActivity extends Activity {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        target_img.recycle();
+        scaled_img.recycle();
 
         return new_picture_file;
 
