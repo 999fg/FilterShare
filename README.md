@@ -1,8 +1,9 @@
 # FilterShare
 
-Installation Guide & User Manual 
+##Installation Guide & User Manual
 
-Installation: Git clone the application to your repository and install it through Android Studio.
+###Installation
+Git clone the application to your repository and install it through Android Studio.
 
 •	Minimum Android API Support: API 21(Lollipop)
 
@@ -10,8 +11,7 @@ Installation: Git clone the application to your repository and install it throug
 
 •	Permission needed: Camera and External Storage access
 
-User Manual
-
+###User Manual
 1.	Download and start FilterShare app.
 
 2.	Notice the permissions request for camera and external storage and accept them.
