@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop = "20dp"
+        android:orientation="horizontal"
+        android:weightSum="21">
+        <LinearLayout
+            android:layout_width="5dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="4"></LinearLayout>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_weight="4">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop = "5dp"
+                android:layout_marginBottom="5dp"
+                android:text="BRIGHTNESS"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop = "5dp"
+                android:layout_marginBottom="5dp"
+                android:text="SATURATION"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop = "5dp"
+                android:layout_marginBottom="5dp"
+                android:text="TEMPERATURE"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop = "5dp"
+                android:layout_marginBottom="5dp"
+                android:text="VIGNETTE"/>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop = "5dp"
+                android:layout_marginBottom="5dp"
+                android:textStyle="bold"
+                android:id="@+id/brightness"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop = "5dp"
+                android:layout_marginBottom="5dp"
+                android:textStyle="bold"
+                android:id="@+id/saturation"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop = "5dp"
+                android:layout_marginBottom="5dp"
+                android:textStyle="bold"
+                android:id="@+id/temperature"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop = "5dp"
+                android:layout_marginBottom="5dp"
+                android:textStyle="bold"
+                android:id="@+id/vignette"/>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="4"></LinearLayout>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_weight="4">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop = "5dp"
+                android:layout_marginBottom="5dp"
+                android:text="CONTRAST"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop = "5dp"
+                android:layout_marginBottom="5dp"
+                android:text="SHARPEN"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop = "5dp"
+                android:layout_marginBottom="5dp"
+                android:text="TINT"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop = "5dp"
+                android:layout_marginBottom="5dp"
+                android:text="GRAIN"/>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop = "5dp"
+                android:layout_marginBottom="5dp"
+                android:textStyle="bold"
+                android:id="@+id/contrast"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop = "5dp"
+                android:layout_marginBottom="5dp"
+                android:textStyle="bold"
+                android:id="@+id/sharpen"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop = "5dp"
+                android:layout_marginBottom="5dp"
+                android:textStyle="bold"
+                android:id="@+id/tint"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop = "5dp"
+                android:layout_marginBottom="5dp"
+                android:textStyle="bold"
+                android:id="@+id/grain"/>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="4"></LinearLayout>
+    </LinearLayout>
+</LinearLayout>
