@@ -35,6 +35,7 @@ public class FilterMakingActivity extends AppCompatActivity implements View.OnCl
     int progress;
     ImageView imgPreview;
     Bitmap origBitmap;
+    Bitmap bitmap;
     int[] origEffects;
 
     @Override
@@ -140,7 +141,7 @@ public class FilterMakingActivity extends AppCompatActivity implements View.OnCl
                 progress = seekBar.getProgress();
                 Log.d("progress", Integer.toString(progress));
                 currentEffect.setValue(progress);
-                imgPreview.setImageBitmap(BitmapProcessing.applyEffects(origBitmap,
+                bitmap = BitmapProcessing.applyEffects(origBitmap,
                         FilterEffect.BRIGHTNESS.getValue(),
                         FilterEffect.CONTRAST.getValue(),
                         FilterEffect.SATURATION.getValue(),
@@ -148,7 +149,8 @@ public class FilterMakingActivity extends AppCompatActivity implements View.OnCl
                         FilterEffect.TEMPERATURE.getValue(),
                         FilterEffect.TINT.getValue(),
                         FilterEffect.VIGNETTE.getValue(),
-                        FilterEffect.GRAIN.getValue()));
+                        FilterEffect.GRAIN.getValue());
+                imgPreview.setImageBitmap(bitmap);
 
                 TextView seekBarValue = (TextView) findViewById(R.id.seek_bar_value);
                 seekBarValue.setText(Integer.toString(progress));
@@ -158,7 +160,7 @@ public class FilterMakingActivity extends AppCompatActivity implements View.OnCl
     }
 
     private void inflateEffects() {
-        imgPreview.setImageBitmap(BitmapProcessing.applyEffects(origBitmap,
+        bitmap = BitmapProcessing.applyEffects(origBitmap,
                 FilterEffect.BRIGHTNESS.getValue(),
                 FilterEffect.CONTRAST.getValue(),
                 FilterEffect.SATURATION.getValue(),
@@ -166,7 +168,8 @@ public class FilterMakingActivity extends AppCompatActivity implements View.OnCl
                 FilterEffect.TEMPERATURE.getValue(),
                 FilterEffect.TINT.getValue(),
                 FilterEffect.VIGNETTE.getValue(),
-                FilterEffect.GRAIN.getValue()));
+                FilterEffect.GRAIN.getValue());
+        imgPreview.setImageBitmap(bitmap);
 
         // Find the parent container for bottom bar
         LinearLayout parent = (LinearLayout) findViewById(R.id.bottom_bar);

@@ -22,7 +22,6 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import com.github.amlcurran.showcaseview.ShowcaseView;
-import com.github.amlcurran.showcaseview.targets.ViewTarget;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -207,7 +206,7 @@ public class FilterMakingConfirmActivity extends AppCompatActivity {
         if(!didTutorial) {
             ShowcaseView mShowcaseView1 = new ShowcaseView.Builder(FilterMakingConfirmActivity.this)
 
-                    .setTarget(new ViewTarget(mConfirm))
+                    //.setTarget(new ViewTarget(mConfirm))
                     .setContentTitle("Share your filter")
                     .setContentText("Write down informatioin about filter name, user name and hashtags. Then, touch the share button to share your own filter with others.")
                     //.setStyle(R.style.CustomShowcaseTheme2)
