@@ -214,7 +214,7 @@ public class MainActivity extends Activity {
                         if(height>=width)
                              resizedImage= Bitmap.createBitmap(realImage, 0,height/2-width/2,width, width);
                         else
-                            resizedImage = Bitmap.createBitmap(realImage, width/2-height/2, 0, width/2+height/2, height);
+                            resizedImage = Bitmap.createBitmap(realImage, width/2-height/2, 0, height, height);
                         Log.d("wh after", "w: "+resizedImage.getWidth()+ " h: "+ resizedImage.getHeight());
                         //Bitmap resizedImage = Bitmap.createScaledBitmap(realImage, 200, 200, true);
 
