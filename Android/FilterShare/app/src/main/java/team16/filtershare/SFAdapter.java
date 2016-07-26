@@ -3,7 +3,9 @@ package team16.filtershare;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.provider.Settings;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -75,6 +77,7 @@ public class SFAdapter extends RecyclerView.Adapter<SFAdapter.ViewHolder> {
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         int filter_likes = sfDataset.get(position).likes;
+        final int bitposition = position;
         String filter_hashtags = "";
         String[] hashtags = sfDataset.get(position).hashtags;
         final String title = sfDataset.get(position).title;
@@ -125,7 +128,16 @@ public class SFAdapter extends RecyclerView.Adapter<SFAdapter.ViewHolder> {
                     public void onClick(DialogInterface dialog, int id) {
                         useAsyncTask UAT = new useAsyncTask();
                         UAT.execute(filter_id);
-                        //TODO: 사진 저장하는법
+                        MainActivity.saveEditedImage(BitmapProcessing.applyEffects(
+                                sfDataset.get(bitposition).realimgbit,
+                                sfDataset.get(bitposition).brightness,
+                                sfDataset.get(bitposition).contrast,
+                                sfDataset.get(bitposition).saturation,
+                                sfDataset.get(bitposition).fade,
+                                sfDataset.get(bitposition).temperature,
+                                sfDataset.get(bitposition).tint,
+                                sfDataset.get(bitposition).vignette,
+                                sfDataset.get(bitposition).grain));
                     }
                 });
                 builder.setNegativeButton("CANCEL", null);
@@ -218,6 +230,7 @@ public class SFAdapter extends RecyclerView.Adapter<SFAdapter.ViewHolder> {
 
 class SFData{
     public Bitmap imgbit;
+    public Bitmap realimgbit;
     public String title;
     public int likes;
     public String[] hashtags;
@@ -231,10 +244,11 @@ class SFData{
     public int vignette;
     public int grain;
     public int filter_id;
-    public SFData(Bitmap imgbit, String title, int likes, String[] hashtags, String madeby,
+    public SFData(Bitmap imgbit, Bitmap realimgbit, String title, int likes, String[] hashtags, String madeby,
                   int brightness, int contrast, int saturation, int fade, int temperature,
                   int tint, int vignette, int grain, int filter_id){
         this.imgbit = imgbit;
+        this.realimgbit = realimgbit;
         this.title = title;
         this.likes = likes;
         this.hashtags = hashtags;

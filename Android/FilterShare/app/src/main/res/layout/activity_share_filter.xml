@@ -13,7 +13,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:titleTextColor="@android:color/white"
-        android:background="?attr/colorPrimary">
+        android:background="?attr/colorPrimary"
+        android:layout_gravity="left">
+        <Spinner
+            android:id="@+id/spinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:popupBackground="#444444" />
     </android.support.v7.widget.Toolbar>
 
     <android.support.v7.widget.RecyclerView
