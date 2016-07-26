@@ -46,8 +46,7 @@
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:background="#909090">
+        android:layout_gravity="center" >
         <ImageButton
             android:id="@+id/change_camera"
             android:layout_width="70dp"

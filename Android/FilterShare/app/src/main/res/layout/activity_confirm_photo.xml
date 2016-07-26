@@ -17,9 +17,6 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#80909090"
-
-
         android:orientation="horizontal">
         <Button
             android:id="@+id/retake_button"
@@ -28,7 +25,8 @@
             android:text="Re-take"
             android:layout_weight="1"
             android:theme="@style/MyButton"
-            android:layout_margin="5dp" />
+            android:layout_margin="5dp"
+            style="?android:attr/borderlessButtonStyle" />
         <Button
             android:id="@+id/confirm_button"
             android:layout_width="wrap_content"
@@ -36,6 +34,7 @@
             android:text="Confirm"
             android:layout_weight="1"
             android:theme="@style/MyButton"
-            android:layout_margin="5dp" />
+            android:layout_margin="5dp"
+            style="?android:attr/borderlessButtonStyle" />
     </LinearLayout>
 </LinearLayout>
