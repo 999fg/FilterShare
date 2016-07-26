@@ -81,7 +81,7 @@ public class SFAdapter extends RecyclerView.Adapter<SFAdapter.ViewHolder> {
         final String atr_brightness = sfDataset.get(position).brightness+"";
         final String atr_contrast = sfDataset.get(position).contrast+"";
         final String atr_saturation = sfDataset.get(position).saturation+"";
-        final String atr_sharpen = sfDataset.get(position).sharpen+"";
+        final String atr_fade = sfDataset.get(position).fade+"";
         final String atr_temperature = sfDataset.get(position).temperature+"";
         final String atr_tint = sfDataset.get(position).tint+"";
         final String atr_vignette = sfDataset.get(position).vignette+"";
@@ -93,7 +93,7 @@ public class SFAdapter extends RecyclerView.Adapter<SFAdapter.ViewHolder> {
                 sfDataset.get(position).brightness,
                 sfDataset.get(position).contrast,
                 sfDataset.get(position).saturation,
-                sfDataset.get(position).sharpen,
+                sfDataset.get(position).fade,
                 sfDataset.get(position).temperature,
                 sfDataset.get(position).tint,
                 sfDataset.get(position).vignette,
@@ -138,8 +138,8 @@ public class SFAdapter extends RecyclerView.Adapter<SFAdapter.ViewHolder> {
                 contrast.setText(atr_contrast);
                 TextView saturation = (TextView) content.findViewById(R.id.saturation);
                 saturation.setText(atr_saturation);
-                TextView sharpen = (TextView) content.findViewById(R.id.sharpen);
-                sharpen.setText(atr_sharpen);
+                TextView fade = (TextView) content.findViewById(R.id.fade);
+                fade.setText(atr_fade);
                 TextView temperature = (TextView) content.findViewById(R.id.temperature);
                 temperature.setText(atr_temperature);
                 TextView tint = (TextView) content.findViewById(R.id.tint);
@@ -225,14 +225,14 @@ class SFData{
     public int brightness;
     public int contrast;
     public int saturation;
-    public int sharpen;
+    public int fade;
     public int temperature;
     public int tint;
     public int vignette;
     public int grain;
     public int filter_id;
     public SFData(Bitmap imgbit, String title, int likes, String[] hashtags, String madeby,
-                  int brightness, int contrast, int saturation, int sharpen, int temperature,
+                  int brightness, int contrast, int saturation, int fade, int temperature,
                   int tint, int vignette, int grain, int filter_id){
         this.imgbit = imgbit;
         this.title = title;
@@ -242,7 +242,7 @@ class SFData{
         this.brightness = brightness;
         this.contrast = contrast;
         this.saturation = saturation;
-        this.sharpen = sharpen;
+        this.fade = fade;
         this.temperature = temperature;
         this.tint = tint;
         this.vignette = vignette;

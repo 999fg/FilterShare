@@ -18,7 +18,7 @@ import android.graphics.Shader;
 
 public class BitmapProcessing {
 
-    public static Bitmap applyEffects(Bitmap origBitmap, int brightness, int contrast, int saturation, int sharpen, int temperature, int tint, int vignette, int grain) {
+    public static Bitmap applyEffects(Bitmap origBitmap, int brightness, int contrast, int saturation, int fade, int temperature, int tint, int vignette, int grain) {
         int width = origBitmap.getWidth();
         int height = origBitmap.getHeight();
         int[] pix = new int[width * height];
@@ -26,7 +26,7 @@ public class BitmapProcessing {
         for (int index = 0; index < width * height; index++) {
             pix[index] = BitmapProcessing.brightness(pix[index], brightness);
             pix[index] = BitmapProcessing.contrast(pix[index], contrast);
-            pix[index] = BitmapProcessing.fade(pix[index], sharpen);
+            pix[index] = BitmapProcessing.fade(pix[index], fade);
             pix[index] = BitmapProcessing.temperature(pix[index], temperature);
             pix[index] = BitmapProcessing.tint(pix[index], tint);
             pix[index] = BitmapProcessing.grain(pix[index], grain);
@@ -35,7 +35,7 @@ public class BitmapProcessing {
         bitmap.setPixels(pix, 0, width, 0, 0, width, height);
         pix = null;
         bitmap = BitmapProcessing.saturation(bitmap, saturation);
-        // bitmap = BitmapProcessing.sharpen(bitmap,sharpen);
+        // bitmap = BitmapProcessing.fade(bitmap,fade);
         bitmap = BitmapProcessing.vignette(bitmap, vignette);
         return bitmap;
     }
@@ -67,21 +67,21 @@ public class BitmapProcessing {
         B = Color.blue(pixel);
 
         // increase/decrease each channel
-        R += value;
+        R += value - 50;
         if (R > 255) {
             R = 255;
         } else if (R < 0) {
             R = 0;
         }
 
-        G += value;
+        G += value - 50;
         if (G > 255) {
             G = 255;
         } else if (G < 0) {
             G = 0;
         }
 
-        B += value;
+        B += value - 50;
         if (B > 255) {
             B = 255;
         } else if (B < 0) {
@@ -94,7 +94,7 @@ public class BitmapProcessing {
     public static int contrast(int pixel, double value) {
         int A, R, G, B;
         // get contrast value
-        double contrast = Math.pow((100 + value) / 100, 2);
+        double contrast = Math.pow((50 + value) / 100, 2);
 
         A = Color.alpha(pixel);
         // apply filter contrast for every channel R, G, B
@@ -127,7 +127,7 @@ public class BitmapProcessing {
 
     // [0, 200] -> Default = 100
     public static Bitmap saturation(Bitmap src, int value) {
-        float f_value = (float) (value / 100.0);
+        float f_value = (value + 50) / 100.0f;
 
         int w = src.getWidth();
         int h = src.getHeight();
@@ -193,34 +193,14 @@ public class BitmapProcessing {
     }
 
     public static int tint(int pixel, int degree) {
-        double PI = 3.14159d;
-        double FULL_CIRCLE_DEGREE = 360d;
-        double HALF_CIRCLE_DEGREE = 180d;
-        double RANGE = 256d;
-
-        int RY, GY, BY, RYY, GYY, BYY, R, G, B, Y;
-        double angle = (PI * (double)degree) / HALF_CIRCLE_DEGREE;
-
-        int S = (int)(RANGE * Math.sin(angle));
-        int C = (int)(RANGE * Math.cos(angle));
-
-        int r = (pixel >> 16) & 0xff;
-        int g = (pixel >> 8) & 0xff;
-        int b = pixel & 0xff;
-        RY = (70 * r - 59 * g - 11 * b) / 100;
-        GY = (-30 * r + 41 * g - 11 * b) / 100;
-        BY = (-30 * r - 59 * g + 89 * b) / 100;
-        Y = (30 * r + 59 * g + 11 * b) / 100;
-        RYY = (S * BY + C * RY) / 256;
-        BYY = (C * BY - S * RY) / 256;
-        GYY = (-51 * RYY - 19 * BYY) / 100;
-        R = Y + RYY;
-        R = (R < 0) ? 0 : ((R > 255) ? 255 : R);
-        G = Y + GYY;
-        G = (G < 0) ? 0 : ((G > 255) ? 255 : G);
-        B = Y + BYY;
-        B = (B < 0) ? 0 : ((B > 255) ? 255 : B);
-        return 0xff000000 | (R << 16) | (G << 8) | B;
+        int A = Color.alpha(pixel);
+        int R = Color.red(pixel);
+        int G = Color.green(pixel);
+        int B = Color.blue(pixel);
+        R = (int)(R * (1 + (degree / 100.0f)));
+        if(R > 255) R = 255;
+        pixel = Color.argb(A, R, G, B);
+        return pixel;
     }
 
     public static Bitmap vignette(Bitmap image, int value) {
@@ -254,12 +234,9 @@ public class BitmapProcessing {
         return image;
     }
 
-	public static int grain(int pixel, int scale) {
-		final int COLOR_MAX = 0xFF;
-		// a random object
-		Random random = new Random();
-
+	public static int grain(int pixel, int value) {
         int color = pixel;
+        float scale = value / 10.0f;
         int red = (int) (constrain(Color.red(color) + scale * (2 * Math.random() - 1), 0, 255));
         int green = (int) (constrain(Color.green(color) + scale * (2 * Math.random() - 1), 0, 255));
         int blue = (int) (constrain(Color.blue(color) + scale * (2 * Math.random() - 1), 0, 255));

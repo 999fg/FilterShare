@@ -67,8 +67,8 @@ public class FilterMakingActivity extends AppCompatActivity implements View.OnCl
                 currentEffect = FilterEffect.SATURATION;
                 inflateSlider();
                 break;
-            case R.id.sharpen_button:
-                currentEffect = FilterEffect.SHARPEN;
+            case R.id.fade_button:
+                currentEffect = FilterEffect.FADE;
                 inflateSlider();
                 break;
             case R.id.temperature_button:
@@ -143,7 +143,7 @@ public class FilterMakingActivity extends AppCompatActivity implements View.OnCl
                         FilterEffect.BRIGHTNESS.getValue(),
                         FilterEffect.CONTRAST.getValue(),
                         FilterEffect.SATURATION.getValue(),
-                        FilterEffect.SHARPEN.getValue(),
+                        FilterEffect.FADE.getValue(),
                         FilterEffect.TEMPERATURE.getValue(),
                         FilterEffect.TINT.getValue(),
                         FilterEffect.VIGNETTE.getValue(),
@@ -161,7 +161,7 @@ public class FilterMakingActivity extends AppCompatActivity implements View.OnCl
                 FilterEffect.BRIGHTNESS.getValue(),
                 FilterEffect.CONTRAST.getValue(),
                 FilterEffect.SATURATION.getValue(),
-                FilterEffect.SHARPEN.getValue(),
+                FilterEffect.FADE.getValue(),
                 FilterEffect.TEMPERATURE.getValue(),
                 FilterEffect.TINT.getValue(),
                 FilterEffect.VIGNETTE.getValue(),
@@ -185,8 +185,8 @@ public class FilterMakingActivity extends AppCompatActivity implements View.OnCl
         contrast_button.setOnClickListener(this);
         ImageButton saturation_button = (ImageButton) findViewById(R.id.saturation_button);
         saturation_button.setOnClickListener(this);
-        ImageButton sharpen_button = (ImageButton) findViewById(R.id.sharpen_button);
-        sharpen_button.setOnClickListener(this);
+        ImageButton fade_button = (ImageButton) findViewById(R.id.fade_button);
+        fade_button.setOnClickListener(this);
         ImageButton temperature_button = (ImageButton) findViewById(R.id.temperature_button);
         temperature_button.setOnClickListener(this);
         ImageButton tint_button = (ImageButton) findViewById(R.id.tint_button);
@@ -200,6 +200,7 @@ public class FilterMakingActivity extends AppCompatActivity implements View.OnCl
         change_image_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                initializeFilterEffects();
                 Intent intent = new Intent(FilterMakingActivity.this, PhotoConfirmActivity.class);
                 startActivity(intent);
             }
@@ -212,6 +213,17 @@ public class FilterMakingActivity extends AppCompatActivity implements View.OnCl
                 startActivity(intent);
             }
         });
+    }
+
+    void initializeFilterEffects() {
+        FilterEffect.BRIGHTNESS.setValue(50);
+        FilterEffect.CONTRAST.setValue(50);
+        FilterEffect.SATURATION.setValue(50);
+        FilterEffect.FADE.setValue(0);
+        FilterEffect.TEMPERATURE.setValue(50);
+        FilterEffect.TINT.setValue(0);
+        FilterEffect.VIGNETTE.setValue(0);
+        FilterEffect.GRAIN.setValue(0);
     }
 }
 

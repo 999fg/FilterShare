@@ -51,7 +51,7 @@ public class FilterMakingConfirmActivity extends AppCompatActivity {
     int firstEffect = 0;
     private boolean mInitialized = false;
 
-    int brightness, contrast, saturation, sharpen, temperature, tint, vignette, grain;
+    int brightness, contrast, saturation, fade, temperature, tint, vignette, grain;
 
     Bitmap bitmap;
     OkHttpClient client;
@@ -77,7 +77,7 @@ public class FilterMakingConfirmActivity extends AppCompatActivity {
                 FilterEffect.BRIGHTNESS.getValue(),
                 FilterEffect.CONTRAST.getValue(),
                 FilterEffect.SATURATION.getValue(),
-                FilterEffect.SHARPEN.getValue(),
+                FilterEffect.FADE.getValue(),
                 FilterEffect.TEMPERATURE.getValue(),
                 FilterEffect.TINT.getValue(),
                 FilterEffect.VIGNETTE.getValue(),
@@ -156,7 +156,7 @@ public class FilterMakingConfirmActivity extends AppCompatActivity {
                 .add("brightness", String.valueOf(FilterEffect.BRIGHTNESS.getValue()))
                 .add("contrast", String.valueOf(FilterEffect.CONTRAST.getValue()))
                 .add("saturation", String.valueOf(FilterEffect.SATURATION.getValue()))
-                .add("sharpen", String.valueOf(FilterEffect.SHARPEN.getValue()))
+                .add("fade", String.valueOf(FilterEffect.FADE.getValue()))
                 .add("temperature", String.valueOf(FilterEffect.TEMPERATURE.getValue()))
                 .add("tint", String.valueOf(FilterEffect.TINT.getValue()))
                 .add("vignette", String.valueOf(FilterEffect.VIGNETTE.getValue()))

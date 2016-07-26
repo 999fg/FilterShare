@@ -943,7 +943,7 @@ public class MainActivity extends Activity {
 
     public void saveScaledImgFile(File original_file){
         //Scale the image into 300x300 jpeg file to improve speed in the filter editing page
-        File scaledFile= createScaledImgFile(original_file.getAbsolutePath(), "scaled_picture.jpg", 300, 300);
+        File scaledFile= createScaledImgFile(original_file.getAbsolutePath(), "scaled_picture.jpg", 400, 400);
         Log.d("scaled_Uri", scaledFile.getAbsolutePath());
         GlobalVariables mApp = ((GlobalVariables)getApplicationContext());
         mApp.set_scaled_path(scaledFile.getAbsolutePath());
