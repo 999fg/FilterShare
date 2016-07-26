@@ -64,3 +64,4 @@ Git clone the application to your repository and install it through Android Stud
 19.	You can input the name of the filter, your username, and the hashtags you want to describe the filter.
 
 20.	Once you’re done, press ‘Share’ to share the filter. After that, you will go to share filter activity. If you don’t like the filter at this moment, press ‘Back’ button to go back to filter making activity.
+
