@@ -3,12 +3,6 @@ package team16.filtershare;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.media.effect.Effect;
-import android.media.effect.EffectContext;
-import android.media.effect.EffectFactory;
-import android.opengl.GLES20;
-import android.opengl.GLSurfaceView;
-import android.opengl.GLUtils;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -21,11 +15,6 @@ import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import java.util.logging.Filter;
-
-import javax.microedition.khronos.egl.EGLConfig;
-import javax.microedition.khronos.opengles.GL10;
-
 /**
  * Created by shinjaemin on 2016. 7. 6..
  */
@@ -36,6 +25,7 @@ public class FilterMakingActivity extends AppCompatActivity implements View.OnCl
     int progress;
     ImageView imgPreview;
     Bitmap origBitmap;
+    Bitmap bitmap;
     int[] origEffects;
 
     @Override
@@ -139,7 +129,7 @@ public class FilterMakingActivity extends AppCompatActivity implements View.OnCl
                 progress = seekBar.getProgress();
                 Log.d("progress", Integer.toString(progress));
                 currentEffect.setValue(progress);
-                imgPreview.setImageBitmap(BitmapProcessing.applyEffects(origBitmap,
+                bitmap = BitmapProcessing.applyEffects(origBitmap,
                         FilterEffect.BRIGHTNESS.getValue(),
                         FilterEffect.CONTRAST.getValue(),
                         FilterEffect.SATURATION.getValue(),
@@ -147,7 +137,8 @@ public class FilterMakingActivity extends AppCompatActivity implements View.OnCl
                         FilterEffect.TEMPERATURE.getValue(),
                         FilterEffect.TINT.getValue(),
                         FilterEffect.VIGNETTE.getValue(),
-                        FilterEffect.GRAIN.getValue()));
+                        FilterEffect.GRAIN.getValue());
+                imgPreview.setImageBitmap(bitmap);
 
                 TextView seekBarValue = (TextView) findViewById(R.id.seek_bar_value);
                 seekBarValue.setText(Integer.toString(progress));
@@ -157,7 +148,7 @@ public class FilterMakingActivity extends AppCompatActivity implements View.OnCl
     }
 
     private void inflateEffects() {
-        imgPreview.setImageBitmap(BitmapProcessing.applyEffects(origBitmap,
+        bitmap = BitmapProcessing.applyEffects(origBitmap,
                 FilterEffect.BRIGHTNESS.getValue(),
                 FilterEffect.CONTRAST.getValue(),
                 FilterEffect.SATURATION.getValue(),
@@ -165,7 +156,8 @@ public class FilterMakingActivity extends AppCompatActivity implements View.OnCl
                 FilterEffect.TEMPERATURE.getValue(),
                 FilterEffect.TINT.getValue(),
                 FilterEffect.VIGNETTE.getValue(),
-                FilterEffect.GRAIN.getValue()));
+                FilterEffect.GRAIN.getValue());
+        imgPreview.setImageBitmap(bitmap);
 
         // Find the parent container for bottom bar
         LinearLayout parent = (LinearLayout) findViewById(R.id.bottom_bar);
