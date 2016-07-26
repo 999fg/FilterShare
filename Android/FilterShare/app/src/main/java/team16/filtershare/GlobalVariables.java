@@ -11,6 +11,7 @@ import android.content.Context;
 public class GlobalVariables extends Application {
 
     private String picture_path;
+    private String scaled_picture_path;
     private static Context context;
 
     public void onCreate() {
@@ -30,5 +31,12 @@ public class GlobalVariables extends Application {
         picture_path = new_path;
     }
 
+    public String get_scaled_path(){
+        return scaled_picture_path;
+    }
+
+    public void set_scaled_path(String new_path){
+        scaled_picture_path = new_path;
+    }
 
 }

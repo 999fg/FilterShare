@@ -4,6 +4,7 @@ require_once($_SERVER['DOCUMENT_ROOT'] . '/API/class/class_helper.php');
 
 $device_id = safePost('device_id');
 $data_paging = safePost('data_paging');
+$query = safePost('query');
 
 /*if(!$name || !$username || !$device_id || !$attributes) {
 	echo "Invalid Parameters";
@@ -12,6 +13,26 @@ $data_paging = safePost('data_paging');
 
 if(!$data_paging) {
 	$data_paging = 0;
+}
+
+if(!$query) {
+	$query = 0;
+}
+
+$order_by_query = NULL;
+$where_query = NULL;
+$params = array('start' => $data_paging);
+
+if($query == 0) {
+	$order_by_query = "ORDER BY filter_id DESC";
+}
+else if($query == 1) {
+	$order_by_query = "ORDER BY filter_id DESC";
+	$where_query = "WHERE device_id = :device_id";
+	$params['device_id'] = $device_id;
+}
+else if($query == 2) {
+	$order_by_query = "ORDER BY (SELECT COUNT(*) FROM filters_used WHERE filter_id = filt.filter_id) DESC";
 }
 
 $filter_query = DB::getDB()->query("
@@ -30,10 +51,11 @@ $filter_query = DB::getDB()->query("
 	atr_grain as grain,
 	(SELECT COUNT(*) FROM filters_used WHERE filter_id = filt.filter_id) as use_count
 	FROM filters filt
-	ORDER BY filter_id DESC
+	$where_query
+	$order_by_query
 	LIMIT :start, 5
 ",
-array('start' => $data_paging));
+$params);
 
 $filter_array = $filter_query->fetchAll(PDO::FETCH_ASSOC);
 
