@@ -234,7 +234,6 @@ public class BitmapProcessing {
         int blue = (int) (constrain(Color.blue(color) + scale * (2 * Math.random() - 1), 0, 255));
         // Put new color
         int randColor = Color.rgb(red, green, blue);
-
         pixel |= randColor;
         return pixel;
 

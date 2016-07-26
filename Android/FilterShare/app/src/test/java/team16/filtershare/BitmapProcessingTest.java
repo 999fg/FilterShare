@@ -1,14 +1,10 @@
 package team16.filtershare;
 
-import android.app.Activity;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -59,8 +55,35 @@ public class BitmapProcessingTest {
     }
 
     @Test
+    public void fade_HigherArgumentValue_ReturnBrighterPixel() {
+        assertTrue(BitmapProcessing.fade(Color.RED, 70) > Color.RED);
+    }
+
+    @Test
     public void temperature_FiftyAsArgumentValue_ReturnSameColor() {
         assertEquals(BitmapProcessing.temperature(Color.RED, 50), Color.RED);
+    }
+
+    @Test
+    public void temperature_ArgumentValueLargerThanFifty_ReturnHigherRLowerGLowerB() {
+        int color = 0x808080;
+        assertTrue(((BitmapProcessing.temperature(color, 80) >> 16) & 0xff)
+                > ((color >> 16) & 0xff));
+        assertTrue(((BitmapProcessing.temperature(color, 80) >> 8) & 0xff)
+                < ((color >> 8) & 0xff));
+        assertTrue((BitmapProcessing.temperature(color, 80)& 0xff)
+                < (color & 0xff));
+    }
+
+    @Test
+    public void temperature_ArgumentValueLessThanFifty_ReturnLowerRHigherGHigherB() {
+        int color = 0x808080;
+        assertTrue(((BitmapProcessing.temperature(color, 20) >> 16) & 0xff)
+                < ((color >> 16) & 0xff));
+        assertTrue(((BitmapProcessing.temperature(color, 20) >> 8) & 0xff)
+                > ((color >> 8) & 0xff));
+        assertTrue((BitmapProcessing.temperature(color, 20)& 0xff)
+                > (color & 0xff));
     }
 
     @Test
@@ -69,17 +92,16 @@ public class BitmapProcessingTest {
     }
 
     @Test
+    public void tint_ArgumentValueLargerThan0_ReturnHigherR() {
+        int color = 0x808080;
+        assertTrue(((BitmapProcessing.tint(color, 80) >> 16) & 0xff)
+                > ((color >> 16) & 0xff));
+    }
+
+    @Test
     public void grain_ZeroAsArgumentValue_ReturnSameColor() {
         assertEquals(BitmapProcessing.grain(Color.RED, 0), Color.RED);
     }
-
-
-    /*
-    @Test
-    public void brightness_ValueProcessing_CorrectReturn() {
-        assertEquals(BitmapProcessing.brightness(0x, ));
-    }
-    */
 
     @After
     public void tearDown() {

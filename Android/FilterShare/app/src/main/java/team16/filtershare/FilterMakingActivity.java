@@ -151,6 +151,7 @@ public class FilterMakingActivity extends AppCompatActivity implements View.OnCl
                         FilterEffect.VIGNETTE.getValue(),
                         FilterEffect.GRAIN.getValue());
                 imgPreview.setImageBitmap(bitmap);
+                bitmap = null;
 
                 TextView seekBarValue = (TextView) findViewById(R.id.seek_bar_value);
                 seekBarValue.setText(Integer.toString(progress));
@@ -170,6 +171,7 @@ public class FilterMakingActivity extends AppCompatActivity implements View.OnCl
                 FilterEffect.VIGNETTE.getValue(),
                 FilterEffect.GRAIN.getValue());
         imgPreview.setImageBitmap(bitmap);
+        bitmap = null;
 
         // Find the parent container for bottom bar
         LinearLayout parent = (LinearLayout) findViewById(R.id.bottom_bar);
