@@ -2,7 +2,6 @@ package team16.filtershare;
 
 // MainActivityTest.java
 
-// Static imports for assertion methods
 import android.os.Build;
 import android.widget.ImageButton;
 
@@ -13,42 +12,67 @@ import org.robolectric.Robolectric;
 import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.annotation.Config;
 
-import static org.junit.Assert.assertEquals;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
 
 /**
  * Created by harrykim on 2016. 7. 26..
  */
 
-@Config(constants = BuildConfig.class, sdk = Build.VERSION_CODES.LOLLIPOP)
+//This codes are derived from the robolectric tutorial from codepath.com to check the entire activity cycles
 @RunWith(RobolectricGradleTestRunner.class)
+@Config(constants = BuildConfig.class, sdk = Build.VERSION_CODES.LOLLIPOP)
 public class MainActivityTest {
-    private MainActivity activity;
+    private MainActivity main_activity;
 
-    // @Before => JUnit 4 annotation that specifies this method should run before each test is run
-    // Useful to do setup for objects that are needed in the test
+
     @Before
-    public void setup() {
-        // Convenience method to run MainActivity through the Activity Lifecycle methods:
-        // onCreate(...) => onStart() => onPostCreate(...) => onResume()
-        activity = Robolectric.setupActivity(MainActivity.class);
+    public void setUp() {
+        main_activity = Robolectric.setupActivity(MainActivity.class);
     }
 
-    // @Test => JUnit 4 annotation specifying this is a test to be run
-    // The test simply checks that our TextView exists and has the text "Hello world!"
+
+    // Test that simulates the full lifecycle of an activity
     @Test
     public void Button_CaputreButtonExists() {
-        ImageButton capture_button = (ImageButton) activity.findViewById(R.id.button_capture);
-        int button_height = capture_button.getHeight();
-        assertEquals(button_height, 70);
+        //createWithIntent("my extra_value");
+        assertNotNull(main_activity);
+        ImageButton capture_button = (ImageButton) main_activity.findViewById(R.id.button_capture);
+        assertNotNull(capture_button);
+        assertEquals(capture_button.getHeight(), 70);
 
+        // ... add assertions ...
+    }
+
+    @Test
+    public void Button_GalleryButtonExists() {
+        //createWithIntent("my extra_value");
+        assertNotNull(main_activity);
+        ImageButton gallery_button = (ImageButton) main_activity.findViewById(R.id.button_gallery);
+        assertNotNull(gallery_button);
+        assertEquals(gallery_button.getHeight(), 70);
+
+        // ... add assertions ...
+    }
+
+    @Test
+    public void Button_ChangeButtonExists() {
+        //createWithIntent("my extra_value");
+        assertNotNull(main_activity);
+        ImageButton change_button = (ImageButton) main_activity.findViewById(R.id.button_gallery);
+        assertNotNull(change_button);
+        assertEquals(change_button.getHeight(), 70);
+
+        // ... add assertions ...
     }
 
     @Test
     public void Rect_AutoFocusRectExists() {
-        AutofocusRect mAutofocusRect = (AutofocusRect) activity.findViewById(R.id.af_rect);
+        AutofocusRect mAutofocusRect = (AutofocusRect) main_activity.findViewById(R.id.af_rect);
         int button_height = mAutofocusRect.getHeight();
+        assertNotNull(mAutofocusRect);
         assertEquals(button_height, 60);
-
     }
+
 }
 
