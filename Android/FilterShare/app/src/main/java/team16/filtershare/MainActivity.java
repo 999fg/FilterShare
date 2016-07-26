@@ -948,8 +948,6 @@ public class MainActivity extends Activity {
         scaled_img.recycle();
 
         return new_picture_file;
-
-
     }
 
     public void saveScaledImgFile(File original_file){
