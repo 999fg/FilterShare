@@ -108,6 +108,7 @@ public class FilterMakingConfirmActivity extends AppCompatActivity {
                     tagsWrapper.setErrorEnabled(false);
                     shareAsyncTask SAT = new shareAsyncTask();
                     SAT.execute(name, username, tags);
+                    /*
                     MainActivity.saveEditedImage(BitmapProcessing.applyEffects(
                             realbitmap,
                             FilterEffect.BRIGHTNESS.getValue(),
@@ -118,6 +119,7 @@ public class FilterMakingConfirmActivity extends AppCompatActivity {
                             FilterEffect.TINT.getValue(),
                             FilterEffect.VIGNETTE.getValue(),
                             FilterEffect.GRAIN.getValue()));
+                            */
                     Intent intent = new Intent(FilterMakingConfirmActivity.this, ShareFilterActivity.class);
                     startActivity(intent);
                 }
@@ -137,7 +139,6 @@ public class FilterMakingConfirmActivity extends AppCompatActivity {
 
         final Button share_button = (Button) findViewById(R.id.share_button);
         share_button.setOnClickListener(cocl);
-        /*
         share_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -145,7 +146,6 @@ public class FilterMakingConfirmActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-        */
         
         tutorial5();
     }
@@ -169,7 +169,7 @@ public class FilterMakingConfirmActivity extends AppCompatActivity {
                 .add("brightness", String.valueOf(FilterEffect.BRIGHTNESS.getValue()))
                 .add("contrast", String.valueOf(FilterEffect.CONTRAST.getValue()))
                 .add("saturation", String.valueOf(FilterEffect.SATURATION.getValue()))
-                .add("fade", String.valueOf(FilterEffect.FADE.getValue()))
+                .add("sharpen", String.valueOf(FilterEffect.FADE.getValue()))
                 .add("temperature", String.valueOf(FilterEffect.TEMPERATURE.getValue()))
                 .add("tint", String.valueOf(FilterEffect.TINT.getValue()))
                 .add("vignette", String.valueOf(FilterEffect.VIGNETTE.getValue()))
