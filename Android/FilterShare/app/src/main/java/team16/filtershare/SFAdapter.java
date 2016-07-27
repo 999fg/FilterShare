@@ -128,7 +128,7 @@ public class SFAdapter extends RecyclerView.Adapter<SFAdapter.ViewHolder> {
                     public void onClick(DialogInterface dialog, int id) {
                         useAsyncTask UAT = new useAsyncTask();
                         UAT.execute(filter_id);
-                        MainActivity.saveEditedImage(BitmapProcessing.applyEffects(
+                        Bitmap bm = BitmapProcessing.applyEffects(
                                 sfDataset.get(bitposition).realimgbit,
                                 sfDataset.get(bitposition).brightness,
                                 sfDataset.get(bitposition).contrast,
@@ -137,7 +137,9 @@ public class SFAdapter extends RecyclerView.Adapter<SFAdapter.ViewHolder> {
                                 sfDataset.get(bitposition).temperature,
                                 sfDataset.get(bitposition).tint,
                                 sfDataset.get(bitposition).vignette,
-                                sfDataset.get(bitposition).grain));
+                                sfDataset.get(bitposition).grain);
+                        MainActivity.saveEditedImage(bm);
+                        bm = null;
                     }
                 });
                 builder.setNegativeButton("CANCEL", null);
