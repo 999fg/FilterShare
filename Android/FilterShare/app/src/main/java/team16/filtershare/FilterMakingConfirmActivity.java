@@ -103,12 +103,13 @@ public class FilterMakingConfirmActivity extends AppCompatActivity {
                 } else if (tags.length() < 1) {
                     tagsWrapper.setError("Please input hashtags to share your filter!");
                 } else {
+                    Log.e("START", "START");
                     filternameWrapper.setErrorEnabled(false);
                     usernameWrapper.setErrorEnabled(false);
                     tagsWrapper.setErrorEnabled(false);
                     shareAsyncTask SAT = new shareAsyncTask();
                     SAT.execute(name, username, tags);
-                    /*
+                    Log.e("START1", "START1");
                     MainActivity.saveEditedImage(BitmapProcessing.applyEffects(
                             realbitmap,
                             FilterEffect.BRIGHTNESS.getValue(),
@@ -119,7 +120,7 @@ public class FilterMakingConfirmActivity extends AppCompatActivity {
                             FilterEffect.TINT.getValue(),
                             FilterEffect.VIGNETTE.getValue(),
                             FilterEffect.GRAIN.getValue()));
-                            */
+                    Log.e("START2", "START2");
                     Intent intent = new Intent(FilterMakingConfirmActivity.this, ShareFilterActivity.class);
                     startActivity(intent);
                 }
@@ -139,13 +140,6 @@ public class FilterMakingConfirmActivity extends AppCompatActivity {
 
         final Button share_button = (Button) findViewById(R.id.share_button);
         share_button.setOnClickListener(cocl);
-        share_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(FilterMakingConfirmActivity.this, ShareFilterActivity.class);
-                startActivity(intent);
-            }
-        });
         
         tutorial5();
     }
