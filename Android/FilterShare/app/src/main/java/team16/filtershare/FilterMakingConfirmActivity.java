@@ -20,6 +20,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.support.annotation.VisibleForTesting;
 
 import com.github.amlcurran.showcaseview.ShowcaseView;
 

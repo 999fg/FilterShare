@@ -9,6 +9,7 @@ import android.graphics.Point;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.annotation.VisibleForTesting;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -43,16 +44,17 @@ import okhttp3.Response;
 
 public class ShareFilterActivity extends AppCompatActivity {
 
-    OkHttpClient client;
+    static OkHttpClient client;
     String android_id;
     int biggest;
+    boolean more_load;
 
     int query_type = 0;
 
-    private RecyclerView recyclerView;
-    private RecyclerView.Adapter adapter;
-    private LinearLayoutManager layoutManager;
-    private ArrayList<SFData> sfDataset;
+    public static RecyclerView recyclerView;
+    public static RecyclerView.Adapter adapter;
+    private static LinearLayoutManager layoutManager;
+    private static ArrayList<SFData> sfDataset;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,24 +91,23 @@ public class ShareFilterActivity extends AppCompatActivity {
         adapter = new SFAdapter(sfDataset, this, client, android_id);
         recyclerView.setAdapter(adapter);
         biggest = 0; //TODO: filter_biggest API to be implemented
+        more_load = true;
 
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                Log.e("position", position+"");
-                if (query_type != position){
+                Log.e("position", position + "");
+                if (query_type != position) {
                     query_type = position;
                     recyclerView.getLayoutManager().scrollToPosition(0);
                     sfDataset.clear();
                     biggest = 0;
-                    if(biggest <= 45)
-                        new queryAsyncTask(bitimg, realbitimg).execute(biggest+"");
-                    if(biggest == 45)
-                        biggest = 46;
-                    else if (biggest > 40)
-                        biggest = 45;
-                    else
+                    more_load = true;
+
+                    if (more_load) {
+                        new queryAsyncTask(bitimg, realbitimg).execute(biggest + "");
                         biggest = biggest + 5;
+                    }
                 }
             }
 
@@ -119,24 +120,15 @@ public class ShareFilterActivity extends AppCompatActivity {
         recyclerView.addOnScrollListener(new EndlessRecyclerOnScrollListener(layoutManager) {
             @Override
             public void onLoadMore(int current_page) {
-                if(biggest <= 45)
-                    new queryAsyncTask(bitimg, realbitimg).execute(biggest+"");
-                if(biggest == 45)
-                    biggest = 46;
-                else if (biggest > 40)
-                    biggest = 45;
-                else
+                if (more_load) {
+                    new queryAsyncTask(bitimg, realbitimg).execute(biggest + "");
                     biggest = biggest + 5;
+                }
             }
         });
         queryAsyncTask QAT = new queryAsyncTask(bitimg, realbitimg);
         QAT.execute(biggest+"");
-        if(biggest == 45)
-            biggest = 46;
-        else if (biggest > 40)
-            biggest = 45;
-        else
-            biggest = biggest + 5;
+        biggest = biggest + 5;
 
         tutorial3();
 
@@ -278,44 +270,49 @@ public class ShareFilterActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
             PrettyTime p = new PrettyTime();
-            for (int i = 0; i<jsonArray.length(); i++){
-                JSONObject jo = null;
-                JSONArray jotags = null;
-                try {
-                    jo = jsonArray.getJSONObject(i);
-                    jotags = new JSONArray(jo.optString("tags"));
-                } catch(JSONException e) {
-                    e.printStackTrace();
-                }
-                Log.e("json", jo.optString("tags"));
-                String[] tags = new String[jotags.length()];
-                for (int j = 0; j<jotags.length(); j++){
+            if (jsonArray.length() == 0){
+                more_load = false;
+            }
+            else {
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    JSONObject jo = null;
+                    JSONArray jotags = null;
                     try {
-                        tags[j] = jotags.get(j) + "";
-                    } catch(JSONException e) {
+                        jo = jsonArray.getJSONObject(i);
+                        jotags = new JSONArray(jo.optString("tags"));
+                    } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                }
+                    Log.e("json", jo.optString("tags"));
+                    String[] tags = new String[jotags.length()];
+                    for (int j = 0; j < jotags.length(); j++) {
+                        try {
+                            tags[j] = jotags.get(j) + "";
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
 
-                sfDataset.add(new SFData(
-                        bitimg,
-                        realbitimg,
-                        jo.optString("name"),
-                        jo.optInt("use_count"),
-                        tags,
-                        jo.optString("username") + ", " + p.format(new Date(Long.parseLong(jo.optString("date_created")))),
-                        jo.optInt("brightness"),
-                        jo.optInt("contrast"),
-                        jo.optInt("saturation"),
-                        jo.optInt("sharpen"),
-                        jo.optInt("temperature"),
-                        jo.optInt("tint"),
-                        jo.optInt("vignette"),
-                        jo.optInt("grain"),
-                        jo.optInt("filter_id")
-                ));
+                    sfDataset.add(new SFData(
+                            bitimg,
+                            realbitimg,
+                            jo.optString("name"),
+                            jo.optInt("use_count"),
+                            tags,
+                            jo.optString("username") + ", " + p.format(new Date(Long.parseLong(jo.optString("date_created")))),
+                            jo.optInt("brightness"),
+                            jo.optInt("contrast"),
+                            jo.optInt("saturation"),
+                            jo.optInt("sharpen"),
+                            jo.optInt("temperature"),
+                            jo.optInt("tint"),
+                            jo.optInt("vignette"),
+                            jo.optInt("grain"),
+                            jo.optInt("filter_id")
+                    ));
+                }
+                adapter.notifyItemInserted(0);
             }
-            adapter.notifyItemInserted(0);
         }
 
         protected JSONObject getres(){
