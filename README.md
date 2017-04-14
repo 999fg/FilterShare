@@ -1,8 +1,12 @@
 # FilterShare
+FilterShare is a custom filter generating and sharing android application. A user can make various filters within the application and share them with others.
 
-##Installation Guide & User Manual
+## Demo
+Demo video is available in [https://youtu.be/u-lKAyZW4tg](https://youtu.be/u-lKAyZW4tg)
 
-###Installation
+## Installation Guide & User Manual
+
+### Installation
 Git clone the application to your repository and install it through Android Studio.
 
 •	Minimum Android API Support: API 21(Lollipop)
@@ -11,7 +15,7 @@ Git clone the application to your repository and install it through Android Stud
 
 •	Permission needed: Camera and External Storage access
 
-###User Manual
+### User Manual
 1.	Download and start FilterShare app.
 
 2.	Notice the permissions request for camera and external storage and accept them.
